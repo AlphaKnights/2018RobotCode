@@ -36,8 +36,8 @@ public class Robot extends IterativeRobot {
 
 		// Invert the left side motors.
 		// You may need to change or remove this to match your robot.
-		//frontLeft.setInverted(true);
-		//rearLeft.setInverted(true);
+		// frontLeft.setInverted(true);
+		// rearLeft.setInverted(true);
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.01);
@@ -48,7 +48,6 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		// Use the joystick X axis for lateral movement, Y axis for forward
 		// movement, and Z axis for rotation.
-		driveTrain.driveCartesian(joystick.getX(), joystick.getY(),
-				joystick.getZ(), 0.0, joystick.getThrottle());
+		driveTrain.driveCartesian(joystick.getX(), joystick.getY(), joystick.getZ(), 0.0, joystick.getThrottle());
 	}
 }
