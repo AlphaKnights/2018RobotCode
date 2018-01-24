@@ -25,6 +25,10 @@ public class AlphaMDrive extends RobotDriveBase {
 	}
 
 	public void driveCartesian(double ySpeed, double xSpeed, double zRotation, double gyroAngle, double throttle) {
+		System.out.println("yspeed: "+ySpeed);
+		System.out.println("xspeed: "+ xSpeed);
+		System.out.println("zrotation: "+zRotation);
+
 		ySpeed = limit(ySpeed);
 		ySpeed = applyDeadband(ySpeed, m_deadband);
 
@@ -49,6 +53,13 @@ public class AlphaMDrive extends RobotDriveBase {
 		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput * throttle);
 
 		m_safetyHelper.feed();
+	}
+	
+	public void driveRigid(double ySpeed, double xSpeed, double gyroAngle, double throttle) {
+		driveCartesian(ySpeed, xSpeed, 0.0, gyroAngle, throttle);
+	}
+	public void driveTurn(double zRotation, double gyroAngle, double throttle) {
+		driveCartesian(0.0, 0.0, zRotation, gyroAngle, throttle);
 	}
 
 	@Override
