@@ -58,8 +58,17 @@ public class AlphaMDrive extends RobotDriveBase {
 	public void driveRigid(double ySpeed, double xSpeed, double gyroAngle, double throttle) {
 		driveCartesian(ySpeed, xSpeed, 0.0, gyroAngle, throttle);
 	}
+	
 	public void driveTurn(double zRotation, double gyroAngle, double throttle) {
 		driveCartesian(0.0, 0.0, zRotation, gyroAngle, throttle);
+	}
+	
+	public Vector2d driveCurveDown(double ySpeed, double xSpeed, double gyroAngle, double throttle) {
+		ySpeed /= 2;
+		xSpeed /= 2;
+		driveCartesian(ySpeed, xSpeed, 0.0, gyroAngle, throttle);
+		
+		return new Vector2d(ySpeed, xSpeed);
 	}
 
 	@Override

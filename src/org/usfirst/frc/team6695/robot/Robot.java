@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.drive.Vector2d;
 
 public class Robot extends IterativeRobot {
 	private static final int kFrontLeftChannel = 1;
@@ -17,11 +18,14 @@ public class Robot extends IterativeRobot {
 
 	private AlphaMDrive driveTrain;
 	private Joystick joystick;
+	
+	private boolean prevTriggered = false;
+	private boolean triggered = false;
+	private Vector2d xySpeed;
 
 	@Override
 	public void robotInit() {
 		CameraServer.getInstance().startAutomaticCapture();
-
 		
 		TalonSRX frontLeft = new TalonSRX(kFrontLeftChannel);
 		TalonSRX rearLeft = new TalonSRX(kRearLeftChannel);
@@ -36,14 +40,20 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void teleopPeriodic() {
 		if (joystick.getTrigger()) {
-			System.err.println("Trigger");
-			driveTrain.driveTurn(joystick.getZ(), 0.0, joystick.getThrottle());
+			triggered = true;
+			xySpeed = new Vector2d(-joystick.getX(), joystick.getY());
 		} else {
-			driveTrain.driveCartesian(-joystick.getX(), joystick.getY(), 0.0, 0.0, joystick.getThrottle());
-
+			triggered = false;
 		}
-		//driveTrain.driveCartesian(-joystick.getX(), joystick.getY(), 0.0, 0.0, joystick.getThrottle());
-		// driveTrain.driveRigid(-joystick.getX(), joystick.getY(), 0.0,
-		// joystick.getThrottle());
+		
+		if (prevTriggered != triggered) {
+			xySpeed = driveTrain.driveCurveDown(xySpeed.x, xySpeed.y, 0.0, joystick.getThrottle());
+			if (xySpeed.x < 0.1 && xySpeed.y < 0.1)
+				prevTriggered = triggered;
+		}
+		else if (triggered)
+			driveTrain.driveTurn(joystick.getZ(), 0.0, joystick.getThrottle());
+		else
+			driveTrain.driveCartesian(-joystick.getX(), joystick.getY(), 0.0, 0.0, joystick.getThrottle());
 	}
 }
