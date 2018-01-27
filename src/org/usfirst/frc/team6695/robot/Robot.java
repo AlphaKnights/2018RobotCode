@@ -52,7 +52,7 @@ public class Robot extends IterativeRobot {
 				prevTriggered = triggered;
 		}
 		else if (triggered)
-			driveTrain.driveTurn(joystick.getZ(), 0.0, joystick.getThrottle());
+			driveTrain.driveArcade(-joystick.getX(), joystick.getY(), 0.0, joystick.getThrottle());
 		else
 			driveTrain.driveCartesian(-joystick.getX(), joystick.getY(), 0.0, 0.0, joystick.getThrottle());
 	}
