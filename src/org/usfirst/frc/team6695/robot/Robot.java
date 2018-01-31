@@ -4,11 +4,9 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.CameraServer;
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.drive.Vector2d;
 
 public class Robot extends IterativeRobot {
 	private static final int kFrontLeftChannel = 1;
@@ -22,9 +20,6 @@ public class Robot extends IterativeRobot {
 	private Joystick joystick;
 	XboxController xbox;
 
-	private boolean prevTriggered = false;
-	private boolean triggered = false;
-	private Vector2d xySpeed;
 
 	@Override
 	public void robotInit() {
