@@ -11,12 +11,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends IterativeRobot {
-	private static final int kFrontLeftChannel = 1;
-	private static final int kRearLeftChannel = 2;
-	private static final int kFrontRightChannel = 4;
-	private static final int kRearRightChannel = 3;
-
-	private static final int kJoystickChannel = 0;
 
 	private AlphaMDrive driveTrain;
 	private Joystick joystick;
@@ -26,20 +20,21 @@ public class Robot extends IterativeRobot {
 	TalonSRX leftBoxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
 
-	Counter c = new Counter(0);
+	Counter LiftLeftEncoder;
+	Counter LiftRightEncoder;
 
 	@Override
 	public void robotInit() {
 		CameraServer.getInstance().startAutomaticCapture();
 
-		TalonSRX frontLeft = new TalonSRX(kFrontLeftChannel);
-		TalonSRX rearLeft = new TalonSRX(kRearLeftChannel);
-		TalonSRX frontRight = new TalonSRX(kFrontRightChannel);
-		TalonSRX rearRight = new TalonSRX(kRearRightChannel);
+		TalonSRX frontLeft = new TalonSRX(Config.DriveTrainFrontLeft);
+		TalonSRX rearLeft = new TalonSRX(Config.DriveTrainRearLeft);
+		TalonSRX frontRight = new TalonSRX(Config.DriveTrainFrontRight);
+		TalonSRX rearRight = new TalonSRX(Config.DriveTrainRearRight);
 
-		rightBoxLiftMotor = new TalonSRX(5);
-		leftBoxLiftMotor = new TalonSRX(6);
-		closingBoxLiftMotor = new TalonSRX(7);
+		rightBoxLiftMotor = new TalonSRX(Config.LiftRightMotor);
+		leftBoxLiftMotor = new TalonSRX(Config.LiftLeftMotor);
+		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
 
 		rightBoxLiftMotor.enableCurrentLimit(false);
 		leftBoxLiftMotor.enableCurrentLimit(false);
@@ -51,8 +46,11 @@ public class Robot extends IterativeRobot {
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
-		joystick = new Joystick(kJoystickChannel);
-		xbox = new XboxController(1);
+		joystick = new Joystick(Config.JoystickChannel);
+		xbox = new XboxController(Config.XBoxChannel);
+
+		LiftLeftEncoder = new Counter(Config.LiftLeftEncoderPort);
+		LiftRightEncoder = new Counter(Config.LiftRightEncoderPort);
 	}
 
 	@Override
@@ -60,7 +58,7 @@ public class Robot extends IterativeRobot {
 		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
 				joystick.getTrigger());
 		boxLift(xbox.getYButton(), xbox.getAButton(), xbox.getBButton(), xbox.getXButton());
-		//System.out.println(c.get());
+		// System.out.println(c.get());
 	}
 
 	// @Override
@@ -108,13 +106,45 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 	}
 
+	boolean prevGoingUp = false;
+
 	public void boxLift(boolean goUp, boolean goDown, boolean close, boolean open) {
+		if (goDown) {
+			LiftLeftEncoder.setReverseDirection(true);
+			LiftRightEncoder.setReverseDirection(true);
+		}
 		if (goUp) {
-			rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-			leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+			LiftLeftEncoder.setReverseDirection(false);
+			LiftRightEncoder.setReverseDirection(false);
+		}
+
+		if (goUp) {
+			if ((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2 < Config.EncoderTopValue) {
+				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= 4) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, .5);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= 4) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, .5);
+				} else {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+				}
+			}
+
 		} else if (goDown) {
-			rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
-			leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+			if (((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2) < 4) {
+				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= 4) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
+				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= 4) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+				} else {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+				}
+			}
 		} else {
 			rightBoxLiftMotor.set(ControlMode.PercentOutput, 0);
 			leftBoxLiftMotor.set(ControlMode.PercentOutput, 0);
