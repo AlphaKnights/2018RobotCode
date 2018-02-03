@@ -20,11 +20,22 @@ public class Robot extends IterativeRobot {
 	TalonSRX leftBoxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
 
-
-	ModeSelector modeTypes;
+	ModeSelector switches;
+	Position fieldPosition;
 	
 	Counter LiftLeftEncoder;
 	Counter LiftRightEncoder;
+
+	Counter DTEncFR;
+	Counter DTEncFL;
+	Counter DTEncRL;
+	Counter DTEncRR;
+
+	public enum Position {
+		Left,
+		Middle,
+		Right;
+	}
 
 	@Override
 	public void robotInit() {
@@ -50,12 +61,24 @@ public class Robot extends IterativeRobot {
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
 		
-		modeTypes = new ModeSelector(1, 2, 3);
+		switches = new ModeSelector(1, 2, 3, 4, 5, 6, 7, 8);
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
 
 		LiftLeftEncoder = new Counter(Config.LiftLeftEncoderPort);
 		LiftRightEncoder = new Counter(Config.LiftRightEncoderPort);
+
+		DTEncFR = new Counter(Config.DrivetrainEncoderFrontRight);
+		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
+		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
+		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
+	}
+
+	boolean teleOpCalled = false;
+
+	@Override
+	public void teleopInit() {
+		teleOpCalled = true;
 	}
 
 	@Override
@@ -68,56 +91,90 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
+		autotime.reset();
+		autotime.start();
 
-		String gameData;
-		gameData = DriverStation.getInstance().getGameSpecificMessage();
-		autonomousPathfinding(gameData, modeTypes.getStartingMode());
-
+		String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		autonomousPathfinding(gameData, modeTypes.switches());
 	}
 
-	public void autonomousPathfinding(String gameData, boolean[] getStartingMode) {
+	public void autonomousPathfinding(String gameData, boolean[] switch) {
+		// 0 - left
+		// 1 - middle
+		// 2 - right
+		// 3 - straight only
+		// 4 - target scale
+		// 5 - target switch
+		// 6 - delay 2s
+		// 7 - delay 5s
 
-		if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == false) {
-			System.out.println("DISABLED_START with switch priority");
+		//TODO: break on autonomous end
 
-		} else if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == true) {
-			System.out.println("DISABLED_START with scale priority");
-
-		} else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == false) {
-			System.out.println("RIGHT_START with switch priority");
-
-		} else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == true) {
-			System.out.println("RIGHT_START with scale priority");
-
-		} else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == false) {
-			System.out.println("LEFT_START with switch priority");
-
-		} else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == true) {
-			System.out.println("LEFT_START with scale priority");
-
-		} else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == false) {
-			System.out.println("CENTER_START with switch priority");
-
-			if (gameData.charAt(0) == 'L') {
-				// Put code for CENTER_START with switch priority LEFT here
-			} else if (gameData.charAt(0) == 'R') {
-				// Put code for CENTER_START with switch priority RIGHT here
-			} else {
-				System.err.println("Couldn't determine LEFT or RIGHT switch priority");
-			}
-		} else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == true) {
-			System.out.println("CENTER_START with scale priority");
-
-			if (gameData.charAt(1) == 'L') {
-				// Put code for CENTER_START with scale priority LEFT here
-			} else if (gameData.charAt(1) == 'R') {
-				// Put code for CENTER_START with scale priority RIGHT here
-			} else {
-				System.err.println("Couldn't determine LEFT or RIGHT scale priority");
-			}
+		if (switch[0]) {
+			fieldPosition = Position.Left;
+		} else if (switch[1]) {
+			fieldPosition = Position.Middle;
+		} else if (switch[2]) {
+			fieldPosition = Position.Right;
 		} else {
-			System.err.println("Couldn't determine pathfinding switch states...");
+			fieldPosition = Position.Left;
 		}
+
+		if (switch[6])
+			try {Thread.sleep(2000);} catch(InterruptedException ex) {Thread.currentThread().interrupt();}
+		if (switch[7])
+			try {Thread.sleep(5000);} catch(InterruptedException ex) {Thread.currentThread().interrupt();}
+
+		if (switch[3]) {
+			System.out.println('go straight');
+		} else if (switch[4]) {
+			System.out.println('target scale');
+		} else if (switch[5]) {
+			System.out.println('target switch');
+		}
+
+
+		// if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == false) {
+		// 	System.out.println("DISABLED_START with switch priority");
+
+		// } else if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == true) {
+		// 	System.out.println("DISABLED_START with scale priority");
+
+		// } else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == false) {
+		// 	System.out.println("RIGHT_START with switch priority");
+
+		// } else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == true) {
+		// 	System.out.println("RIGHT_START with scale priority");
+
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == false) {
+		// 	System.out.println("LEFT_START with switch priority");
+
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == true) {
+		// 	System.out.println("LEFT_START with scale priority");
+
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == false) {
+		// 	System.out.println("CENTER_START with switch priority");
+
+		// 	if (gameData.charAt(0) == 'L') {
+		// 		// Put code for CENTER_START with switch priority LEFT here
+		// 	} else if (gameData.charAt(0) == 'R') {
+		// 		// Put code for CENTER_START with switch priority RIGHT here
+		// 	} else {
+		// 		System.err.println("Couldn't determine LEFT or RIGHT switch priority");
+		// 	}
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == true) {
+		// 	System.out.println("CENTER_START with scale priority");
+
+		// 	if (gameData.charAt(1) == 'L') {
+		// 		// Put code for CENTER_START with scale priority LEFT here
+		// 	} else if (gameData.charAt(1) == 'R') {
+		// 		// Put code for CENTER_START with scale priority RIGHT here
+		// 	} else {
+		// 		System.err.println("Couldn't determine LEFT or RIGHT scale priority");
+		// 	}
+		// } else {
+		// 	System.err.println("Couldn't determine pathfinding switch states...");
+		// }
 
 	}
 
@@ -181,5 +238,29 @@ public class Robot extends IterativeRobot {
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+	}
+
+	public void DriveX(double speed, double feet) {
+		drivetrainEncLeft.reset(); drivetrainEncRight.reset();
+		while (Math.abs(drivetrainEncLeft.get()) < Math.abs(feet * Config.encUnit) &&
+			   Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
+			drivetrain.driveLinearX(speed);
+		}
+	}
+
+	public void DriveY(double speed, double feet) {
+		drivetrainEncLeft.reset(); drivetrainEncRight.reset();
+		while (Math.abs(drivetrainEncLeft.get()) < Math.abs(feet * Config.encUnit) &&
+			   Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
+			drivetrain.driveLinearY(speed);
+		}
+	}
+
+	public void DriveRotational(double speed, double degrees) {
+		drivetrainEncLeft.reset(); drivetrainEncRight.reset();
+		while (Math.abs(drivetrainEncLeft.get()) < Math.abs(degrees * Config.degUnit) &&
+			   Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.degUnit) && !teleOpCalled && autotime.get() < 15) {
+			drivetrain.driveRotational(speed);
+		}
 	}
 }

@@ -81,6 +81,48 @@ public class AlphaMDrive extends RobotDriveBase {
 		m_safetyHelper.feed();
 	}
 
+	public void driveLinearY(double speed) {
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = -speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = speed;
+		wheelSpeeds[MotorType.kRearRight.value] = -speed;
+
+		normalize(wheelSpeeds);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+	}
+
+	public void driveLinearX(double speed) {
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = -speed;
+		wheelSpeeds[MotorType.kRearRight.value] = -speed;
+
+		normalize(wheelSpeeds);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+	}
+
+	public void driveRotational(double speed) {
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = speed;
+		wheelSpeeds[MotorType.kRearRight.value] = speed;
+
+		normalize(wheelSpeeds);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+	}
+
 	public void driveTurn(double zRotation, double gyroAngle, double throttle) {
 		driveCartesian(0.0, 0.0, zRotation, gyroAngle, throttle);
 	}
