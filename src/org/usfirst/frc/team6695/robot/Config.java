@@ -13,10 +13,10 @@ public final class Config {
 
 	static final int JoystickChannel = 0;
 	static final int XBoxChannel = 1;
-	
+
 	static final int EncoderTopValue = 1000;
-	static final int LiftLeftEncoderPort = 0; //TODO: PLACEHOLDER
-	static final int LiftRightEncoderPort = 0; //TODO: PLACEHOLDER
+	static final int LiftLeftEncoderPort = 0; // TODO: PLACEHOLDER
+	static final int LiftRightEncoderPort = 0; // TODO: PLACEHOLDER
 	static final int EncoderRange = 20;
 
 	// 1 foot
@@ -25,8 +25,8 @@ public final class Config {
 	// 360 degrees
 	static final double degUnit = 100;
 
-	static final int DrivetrainEncoderFrontRight = 0; //TODO: PLACEHOLDER
-	static final int DrivetrainEncoderFrontLeft = 0; //TODO: PLACEHOLDER
-	static final int DrivetrainEncoderRearRight = 0; //TODO: PLACEHOLDER
-	static final int DrivetrainEncoderRearLeft = 0; //TODO: PLACEHOLDER
+	static final int DrivetrainEncoderFrontRight = 0; // TODO: PLACEHOLDER
+	static final int DrivetrainEncoderFrontLeft = 0; // TODO: PLACEHOLDER
+	static final int DrivetrainEncoderRearRight = 0; // TODO: PLACEHOLDER
+	static final int DrivetrainEncoderRearLeft = 0; // TODO: PLACEHOLDER
 }

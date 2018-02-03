@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends IterativeRobot {
@@ -22,7 +23,7 @@ public class Robot extends IterativeRobot {
 
 	ModeSelector switches;
 	Position fieldPosition;
-	
+
 	Counter LiftLeftEncoder;
 	Counter LiftRightEncoder;
 
@@ -30,6 +31,8 @@ public class Robot extends IterativeRobot {
 	Counter DTEncFL;
 	Counter DTEncRL;
 	Counter DTEncRR;
+
+	Timer autotime;
 
 	public enum Position {
 		Left,
@@ -60,7 +63,7 @@ public class Robot extends IterativeRobot {
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
-		
+
 		switches = new ModeSelector(1, 2, 3, 4, 5, 6, 7, 8);
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
@@ -72,6 +75,8 @@ public class Robot extends IterativeRobot {
 		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
 		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
+
+		autotime = new Timer();
 	}
 
 	boolean teleOpCalled = false;
@@ -95,10 +100,10 @@ public class Robot extends IterativeRobot {
 		autotime.start();
 
 		String gameData = DriverStation.getInstance().getGameSpecificMessage();
-		autonomousPathfinding(gameData, modeTypes.switches());
+		autonomousPathfinding(gameData, switches.getSwitches());
 	}
 
-	public void autonomousPathfinding(String gameData, boolean[] switch) {
+	public void autonomousPathfinding(String gameData, boolean[] input) {
 		// 0 - left
 		// 1 - middle
 		// 2 - right
@@ -108,72 +113,85 @@ public class Robot extends IterativeRobot {
 		// 6 - delay 2s
 		// 7 - delay 5s
 
-		//TODO: break on autonomous end
+		// TODO: break on autonomous end
 
-		if (switch[0]) {
+		if (input[0]) {
 			fieldPosition = Position.Left;
-		} else if (switch[1]) {
+		} else if (input[1]) {
 			fieldPosition = Position.Middle;
-		} else if (switch[2]) {
+		} else if (input[2]) {
 			fieldPosition = Position.Right;
 		} else {
 			fieldPosition = Position.Left;
 		}
 
-		if (switch[6])
-			try {Thread.sleep(2000);} catch(InterruptedException ex) {Thread.currentThread().interrupt();}
-		if (switch[7])
-			try {Thread.sleep(5000);} catch(InterruptedException ex) {Thread.currentThread().interrupt();}
-
-		if (switch[3]) {
-			System.out.println('go straight');
-		} else if (switch[4]) {
-			System.out.println('target scale');
-		} else if (switch[5]) {
-			System.out.println('target switch');
+		if (input[6]) try {
+			Thread.sleep(2000);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+		if (input[7]) try {
+			Thread.sleep(5000);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
 		}
 
+		if (input[3]) {
+			System.out.println("go straight");
+		} else if (input[4]) {
+			System.out.println("target scale");
+		} else if (input[5]) {
+			System.out.println("target switch");
+		}
 
-		// if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == false) {
-		// 	System.out.println("DISABLED_START with switch priority");
+		// if (getStartingMode[0] == false && getStartingMode[1] == false &&
+		// getStartingMode[2] == false) {
+		// System.out.println("DISABLED_START with switch priority");
 
-		// } else if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == true) {
-		// 	System.out.println("DISABLED_START with scale priority");
+		// } else if (getStartingMode[0] == false && getStartingMode[1] == false &&
+		// getStartingMode[2] == true) {
+		// System.out.println("DISABLED_START with scale priority");
 
-		// } else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == false) {
-		// 	System.out.println("RIGHT_START with switch priority");
+		// } else if (getStartingMode[0] == false && getStartingMode[1] == true &&
+		// getStartingMode[2] == false) {
+		// System.out.println("RIGHT_START with switch priority");
 
-		// } else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == true) {
-		// 	System.out.println("RIGHT_START with scale priority");
+		// } else if (getStartingMode[0] == false && getStartingMode[1] == true &&
+		// getStartingMode[2] == true) {
+		// System.out.println("RIGHT_START with scale priority");
 
-		// } else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == false) {
-		// 	System.out.println("LEFT_START with switch priority");
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == false &&
+		// getStartingMode[2] == false) {
+		// System.out.println("LEFT_START with switch priority");
 
-		// } else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == true) {
-		// 	System.out.println("LEFT_START with scale priority");
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == false &&
+		// getStartingMode[2] == true) {
+		// System.out.println("LEFT_START with scale priority");
 
-		// } else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == false) {
-		// 	System.out.println("CENTER_START with switch priority");
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == true &&
+		// getStartingMode[2] == false) {
+		// System.out.println("CENTER_START with switch priority");
 
-		// 	if (gameData.charAt(0) == 'L') {
-		// 		// Put code for CENTER_START with switch priority LEFT here
-		// 	} else if (gameData.charAt(0) == 'R') {
-		// 		// Put code for CENTER_START with switch priority RIGHT here
-		// 	} else {
-		// 		System.err.println("Couldn't determine LEFT or RIGHT switch priority");
-		// 	}
-		// } else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == true) {
-		// 	System.out.println("CENTER_START with scale priority");
-
-		// 	if (gameData.charAt(1) == 'L') {
-		// 		// Put code for CENTER_START with scale priority LEFT here
-		// 	} else if (gameData.charAt(1) == 'R') {
-		// 		// Put code for CENTER_START with scale priority RIGHT here
-		// 	} else {
-		// 		System.err.println("Couldn't determine LEFT or RIGHT scale priority");
-		// 	}
+		// if (gameData.charAt(0) == 'L') {
+		// // Put code for CENTER_START with switch priority LEFT here
+		// } else if (gameData.charAt(0) == 'R') {
+		// // Put code for CENTER_START with switch priority RIGHT here
 		// } else {
-		// 	System.err.println("Couldn't determine pathfinding switch states...");
+		// System.err.println("Couldn't determine LEFT or RIGHT switch priority");
+		// }
+		// } else if (getStartingMode[0] == true && getStartingMode[1] == true &&
+		// getStartingMode[2] == true) {
+		// System.out.println("CENTER_START with scale priority");
+
+		// if (gameData.charAt(1) == 'L') {
+		// // Put code for CENTER_START with scale priority LEFT here
+		// } else if (gameData.charAt(1) == 'R') {
+		// // Put code for CENTER_START with scale priority RIGHT here
+		// } else {
+		// System.err.println("Couldn't determine LEFT or RIGHT scale priority");
+		// }
+		// } else {
+		// System.err.println("Couldn't determine pathfinding switch states...");
 		// }
 
 	}
@@ -240,27 +258,31 @@ public class Robot extends IterativeRobot {
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 
-	public void DriveX(double speed, double feet) {
-		drivetrainEncLeft.reset(); drivetrainEncRight.reset();
-		while (Math.abs(drivetrainEncLeft.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
-			drivetrain.driveLinearX(speed);
-		}
-	}
-
-	public void DriveY(double speed, double feet) {
-		drivetrainEncLeft.reset(); drivetrainEncRight.reset();
-		while (Math.abs(drivetrainEncLeft.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
-			drivetrain.driveLinearY(speed);
-		}
-	}
-
-	public void DriveRotational(double speed, double degrees) {
-		drivetrainEncLeft.reset(); drivetrainEncRight.reset();
-		while (Math.abs(drivetrainEncLeft.get()) < Math.abs(degrees * Config.degUnit) &&
-			   Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.degUnit) && !teleOpCalled && autotime.get() < 15) {
-			drivetrain.driveRotational(speed);
-		}
-	}
+	// public void DriveX(double speed, double feet) {
+	// DTE.reset(); drivetrainEncRight.reset();
+	// while (Math.abs(drivetrainEncLeft.get()) < Math.abs(feet * Config.encUnit) &&
+	// Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.encUnit) &&
+	// !teleOpCalled && autotime.get() < 15) {
+	// drivetrain.driveLinearX(speed);
+	// }
+	// }
+	//
+	// public void DriveY(double speed, double feet) {
+	// drivetrainEncLeft.reset(); drivetrainEncRight.reset();
+	// while (Math.abs(drivetrainEncLeft.get()) < Math.abs(feet * Config.encUnit) &&
+	// Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.encUnit) &&
+	// !teleOpCalled && autotime.get() < 15) {
+	// drivetrain.driveLinearY(speed);
+	// }
+	// }
+	//
+	// public void DriveRotational(double speed, double degrees) {
+	// drivetrainEncLeft.reset(); drivetrainEncRight.reset();
+	// while (Math.abs(drivetrainEncLeft.get()) < Math.abs(degrees * Config.degUnit)
+	// &&
+	// Math.abs(drivetrainEncRight.get()) < Math.abs(feet * Config.degUnit) &&
+	// !teleOpCalled && autotime.get() < 15) {
+	// drivetrain.driveRotational(speed);
+	// }
+	// }
 }
