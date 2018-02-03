@@ -17,4 +17,5 @@ public final class Config {
 	static final int EncoderTopValue =1000;
 	static final int LiftLeftEncoderPort = 0;
 	static final int LiftRightEncoderPort = 0;
+	static final int EncoderRange = 20;
 }

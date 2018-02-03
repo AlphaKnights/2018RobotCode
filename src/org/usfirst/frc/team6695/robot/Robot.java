@@ -106,8 +106,18 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 	}
 
-	boolean prevGoingUp = false;
-
+	/**
+	 * This is the box Lift Code
+	 * 
+	 * @param goUp
+	 *            Button to go up. Boolean Value
+	 * @param goDown
+	 *            Button to go down. Boolean Value
+	 * @param close
+	 *            Button to close the Thing. Boolean Value
+	 * @param open
+	 *            Button to open the thing. Boolean Value
+	 */
 	public void boxLift(boolean goUp, boolean goDown, boolean close, boolean open) {
 		if (goDown) {
 			LiftLeftEncoder.setReverseDirection(true);
@@ -120,10 +130,10 @@ public class Robot extends IterativeRobot {
 
 		if (goUp) {
 			if ((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2 < Config.EncoderTopValue) {
-				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= 4) {
+				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= Config.EncoderRange) {
 					rightBoxLiftMotor.set(ControlMode.PercentOutput, .5);
 					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= 4) {
+				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= Config.EncoderRange) {
 					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 					leftBoxLiftMotor.set(ControlMode.PercentOutput, .5);
 				} else {
@@ -134,10 +144,10 @@ public class Robot extends IterativeRobot {
 
 		} else if (goDown) {
 			if (((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2) < 4) {
-				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= 4) {
+				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= Config.EncoderRange) {
 					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 					leftBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
-				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= 4) {
+				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= Config.EncoderRange) {
 					rightBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
 					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 				} else {
