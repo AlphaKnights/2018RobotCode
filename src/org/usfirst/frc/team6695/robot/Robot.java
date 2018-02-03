@@ -11,12 +11,6 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends IterativeRobot {
-	private static final int kFrontLeftChannel = 1;
-	private static final int kRearLeftChannel = 2;
-	private static final int kFrontRightChannel = 4;
-	private static final int kRearRightChannel = 3;
-
-	private static final int kJoystickChannel = 0;
 
 	private AlphaMDrive driveTrain;
 	private Joystick joystick;
