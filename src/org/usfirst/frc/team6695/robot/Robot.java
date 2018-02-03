@@ -27,7 +27,8 @@ public class Robot extends IterativeRobot {
 	TalonSRX closingBoxLiftMotor;
 
 	Counter c = new Counter(0);
-
+	ModeSelector modeTypes;
+	
 	@Override
 	public void robotInit() {
 		CameraServer.getInstance().startAutomaticCapture();
@@ -53,6 +54,8 @@ public class Robot extends IterativeRobot {
 		driveTrain.setDeadband(.1);
 		joystick = new Joystick(kJoystickChannel);
 		xbox = new XboxController(1);
+		
+		modeTypes = new ModeSelector(1, 2, 3);
 	}
 
 	@Override
@@ -60,7 +63,7 @@ public class Robot extends IterativeRobot {
 		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
 				joystick.getTrigger());
 		boxLift(xbox.getYButton(), xbox.getAButton(), xbox.getBButton(), xbox.getXButton());
-		//System.out.println(c.get());
+		// System.out.println(c.get());
 	}
 
 	@Override
@@ -68,32 +71,54 @@ public class Robot extends IterativeRobot {
 
 		String gameData;
 		gameData = DriverStation.getInstance().getGameSpecificMessage();
-		autonomousPathfinding(gameData, null);
+		autonomousPathfinding(gameData, modeTypes.getStartingMode());
 
 	}
-	
+
 	public void autonomousPathfinding(String gameData, boolean[] getStartingMode) {
-		
-		if(getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == false) { // DISABLED_START with switch priority
-			
-		} else if(getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == true) { // DISABLED_START with scale priority
-			
-		} else if(getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == false) { // RIGHT_START with switch priority
-			
-		} else if(getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == true) { // RIGHT_START with scale priority
-			
-		} else if(getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == false) { // LEFT_START with switch priority
-			
-		} else if(getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == true) { // LEFT_START with scale priority
-			
-		} else if(getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == false) { // CENTER_START with switch priority
-			
-		} else if(getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == true) { // CENTER_START with scale priority
-			
+
+		if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == false) {
+			System.out.println("DISABLED_START with switch priority");
+
+		} else if (getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == true) {
+			System.out.println("DISABLED_START with scale priority");
+
+		} else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == false) {
+			System.out.println("RIGHT_START with switch priority");
+
+		} else if (getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == true) {
+			System.out.println("RIGHT_START with scale priority");
+
+		} else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == false) {
+			System.out.println("LEFT_START with switch priority");
+
+		} else if (getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == true) {
+			System.out.println("LEFT_START with scale priority");
+
+		} else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == false) {
+			System.out.println("CENTER_START with switch priority");
+
+			if (gameData.charAt(0) == 'L') {
+				// Put code for CENTER_START with switch priority LEFT here
+			} else if (gameData.charAt(0) == 'R') {
+				// Put code for CENTER_START with switch priority RIGHT here
+			} else {
+				System.err.println("Couldn't determine LEFT or RIGHT switch priority");
+			}
+		} else if (getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == true) {
+			System.out.println("CENTER_START with scale priority");
+
+			if (gameData.charAt(1) == 'L') {
+				// Put code for CENTER_START with scale priority LEFT here
+			} else if (gameData.charAt(1) == 'R') {
+				// Put code for CENTER_START with scale priority RIGHT here
+			} else {
+				System.err.println("Couldn't determine LEFT or RIGHT scale priority");
+			}
 		} else {
-			// Throw errors here
+			System.err.println("Couldn't determine pathfinding switch states...");
 		}
-		
+
 	}
 
 	@Override
