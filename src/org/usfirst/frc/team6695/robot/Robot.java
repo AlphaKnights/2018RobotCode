@@ -63,45 +63,37 @@ public class Robot extends IterativeRobot {
 		//System.out.println(c.get());
 	}
 
-	// @Override
-	// public void autonomousInit() {
-	// //
-	// https://wpilib.screenstepslive.com/s/currentCS/m/getting_started/l/826278-2018-game-data-details
-	//
-	// }
 	@Override
 	public void autonomousInit() {
 
 		String gameData;
 		gameData = DriverStation.getInstance().getGameSpecificMessage();
+		autonomousPathfinding(gameData, null);
 
-		LEFT: // starting position 'Left'
-		if (gameData.charAt(0) == 'L') { // L-- (always going for switch)
-			// put switch code for L here
-		} else { // R-- (never go for switch)
-			if (gameData.charAt(1) == 'L') { // RL-
-				// put scale code for L here
-			} else { // RR-
-
-				// idk :)
-			}
+	}
+	
+	public void autonomousPathfinding(String gameData, boolean[] getStartingMode) {
+		
+		if(getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == false) { // DISABLED_START with switch priority
+			
+		} else if(getStartingMode[0] == false && getStartingMode[1] == false && getStartingMode[2] == true) { // DISABLED_START with scale priority
+			
+		} else if(getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == false) { // RIGHT_START with switch priority
+			
+		} else if(getStartingMode[0] == false && getStartingMode[1] == true && getStartingMode[2] == true) { // RIGHT_START with scale priority
+			
+		} else if(getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == false) { // LEFT_START with switch priority
+			
+		} else if(getStartingMode[0] == true && getStartingMode[1] == false && getStartingMode[2] == true) { // LEFT_START with scale priority
+			
+		} else if(getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == false) { // CENTER_START with switch priority
+			
+		} else if(getStartingMode[0] == true && getStartingMode[1] == true && getStartingMode[2] == true) { // CENTER_START with scale priority
+			
+		} else {
+			// Throw errors here
 		}
-		CENTER: // starting position 'Center'
-		if (gameData.charAt(0) == 'L') { // L--
-			// put switch code for C here
-		} else { // R--
-			// put switch code for C here
-		}
-		RIGHT: // starting position 'Right'
-		if (gameData.charAt(0) == 'L') { // L--
-			if (gameData.charAt(1) == 'L') { // LL-
-				// idk :
-			} else { // LR-
-				// put scale code for L here
-			}
-		} else { // R-- (always go for switch)
-			// put switch code for R here
-		}
+		
 	}
 
 	@Override
