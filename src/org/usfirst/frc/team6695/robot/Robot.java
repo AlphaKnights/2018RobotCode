@@ -26,21 +26,24 @@ public class Robot extends IterativeRobot {
 	TalonSRX leftBoxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
 
-	Counter c = new Counter(0);
+
 	ModeSelector modeTypes;
 	
+	Counter LiftLeftEncoder;
+	Counter LiftRightEncoder;
+
 	@Override
 	public void robotInit() {
 		CameraServer.getInstance().startAutomaticCapture();
 
-		TalonSRX frontLeft = new TalonSRX(kFrontLeftChannel);
-		TalonSRX rearLeft = new TalonSRX(kRearLeftChannel);
-		TalonSRX frontRight = new TalonSRX(kFrontRightChannel);
-		TalonSRX rearRight = new TalonSRX(kRearRightChannel);
+		TalonSRX frontLeft = new TalonSRX(Config.DriveTrainFrontLeft);
+		TalonSRX rearLeft = new TalonSRX(Config.DriveTrainRearLeft);
+		TalonSRX frontRight = new TalonSRX(Config.DriveTrainFrontRight);
+		TalonSRX rearRight = new TalonSRX(Config.DriveTrainRearRight);
 
-		rightBoxLiftMotor = new TalonSRX(5);
-		leftBoxLiftMotor = new TalonSRX(6);
-		closingBoxLiftMotor = new TalonSRX(7);
+		rightBoxLiftMotor = new TalonSRX(Config.LiftRightMotor);
+		leftBoxLiftMotor = new TalonSRX(Config.LiftLeftMotor);
+		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
 
 		rightBoxLiftMotor.enableCurrentLimit(false);
 		leftBoxLiftMotor.enableCurrentLimit(false);
@@ -52,10 +55,13 @@ public class Robot extends IterativeRobot {
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
-		joystick = new Joystick(kJoystickChannel);
-		xbox = new XboxController(1);
 		
 		modeTypes = new ModeSelector(1, 2, 3);
+		joystick = new Joystick(Config.JoystickChannel);
+		xbox = new XboxController(Config.XBoxChannel);
+
+		LiftLeftEncoder = new Counter(Config.LiftLeftEncoderPort);
+		LiftRightEncoder = new Counter(Config.LiftRightEncoderPort);
 	}
 
 	@Override
@@ -125,13 +131,55 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 	}
 
+	/**
+	 * This is the box Lift Code
+	 * 
+	 * @param goUp
+	 *            Button to go up. Boolean Value
+	 * @param goDown
+	 *            Button to go down. Boolean Value
+	 * @param close
+	 *            Button to close the Thing. Boolean Value
+	 * @param open
+	 *            Button to open the thing. Boolean Value
+	 */
 	public void boxLift(boolean goUp, boolean goDown, boolean close, boolean open) {
+		if (goDown) {
+			LiftLeftEncoder.setReverseDirection(true);
+			LiftRightEncoder.setReverseDirection(true);
+		}
 		if (goUp) {
-			rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-			leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+			LiftLeftEncoder.setReverseDirection(false);
+			LiftRightEncoder.setReverseDirection(false);
+		}
+
+		if (goUp) {
+			if ((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2 < Config.EncoderTopValue) {
+				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= Config.EncoderRange) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, .5);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= Config.EncoderRange) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, .5);
+				} else {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
+				}
+			}
+
 		} else if (goDown) {
-			rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
-			leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+			if (((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2) < 4) {
+				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= Config.EncoderRange) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
+				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= Config.EncoderRange) {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+				} else {
+					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
+				}
+			}
 		} else {
 			rightBoxLiftMotor.set(ControlMode.PercentOutput, 0);
 			leftBoxLiftMotor.set(ControlMode.PercentOutput, 0);
