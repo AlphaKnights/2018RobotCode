@@ -15,7 +15,7 @@ public final class Config {
 	static final int XBoxChannel = 1;
 	
 	static final int EncoderTopValue =1000;
-	static final int LiftLeftEncoderPort = 0;
-	static final int LiftRightEncoderPort = 0;
+	static final int LiftLeftEncoderPort = 4;
+	static final int LiftRightEncoderPort = 5;
 	static final int EncoderRange = 20;
 }
