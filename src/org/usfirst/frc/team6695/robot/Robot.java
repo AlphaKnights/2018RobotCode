@@ -2,12 +2,14 @@ package org.usfirst.frc.team6695.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends IterativeRobot {
@@ -22,6 +24,8 @@ public class Robot extends IterativeRobot {
 
 	Counter LiftLeftEncoder;
 	Counter LiftRightEncoder;
+
+	AHRS navx;
 
 	@Override
 	public void robotInit() {
@@ -51,6 +55,12 @@ public class Robot extends IterativeRobot {
 
 		LiftLeftEncoder = new Counter(Config.LiftLeftEncoderPort);
 		LiftRightEncoder = new Counter(Config.LiftRightEncoderPort);
+		try {
+			navx = new AHRS(SPI.Port.kMXP);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("YO YO YO! That Navx board is not working!!!");
+		}
 	}
 
 	@Override
