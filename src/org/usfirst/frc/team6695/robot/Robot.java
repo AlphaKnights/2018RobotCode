@@ -103,8 +103,11 @@ public void autonomousInit() {
 	autonomousPathfinding(gameData, switches.getSwitches());
 }
 
+/** Go to the scale */
 boolean scalePriority = false;
+/** Go to the switch */
 boolean switchPriority = false;
+/** Cross the line */
 boolean autonomousStraight = false;
 
 public void autonomousPathfinding(String gameData, boolean[] input) {
@@ -118,7 +121,6 @@ public void autonomousPathfinding(String gameData, boolean[] input) {
 	// 7 - delay 5s
 
 	// TODO: break on autonomous end
-
 	if (input[0]) {
 		fieldPosition = Position.Left;
 	} else if (input[1]) {
@@ -134,10 +136,10 @@ public void autonomousPathfinding(String gameData, boolean[] input) {
 		System.out.println("go straight");
 	} else if (input[4]) {
 		scalePriority = true;
-		System.out.println("target scale");
+		System.out.println("Target scale");
 	} else if (input[5]) {
 		switchPriority = true;
-		System.out.println("target switch");
+		System.out.println("Target switch");
 	}
 
 	if (input[6]) try {
@@ -153,12 +155,28 @@ public void autonomousPathfinding(String gameData, boolean[] input) {
 
 	// TODO: Verify the logic of gameData and if switchPriority or scalePriority interferes with it
 	if(fieldPosition == Position.Left && scalePriority == true && switchPriority == false) {
-		
-	
+		if(gameData.charAt(1) == 'L') {
+			// Put left auto code here with scale priority
+		} else if(gameData.charAt(1) == 'R') {
+			// Put autonomous straight code here
+		} else {
+			System.err.println("Couldn't determine gameData.charAt(1)");
+		}
 
 	} else if(fieldPosition == Position.Left && scalePriority == false && switchPriority == true) {
-		
-
+		if(gameData.charAt(0) == 'L') {
+			// Put left auto code here with switch priority
+		} else if(gameData.charAt(0) == 'R') {
+			if(gameData.charAt(1) == 'L') {
+				// Put left auto here with scale priority
+			} else if(gameData.charAt(1) == 'R') {
+				// Put autonomous straight code here
+			} else {
+				System.err.println("Couldn't determine gameData.charAt(1)");
+			}
+		} else {
+			System.err.println("Couldn't determine gameData.charAt(0)");
+		}
 
 	} else if(fieldPosition == Position.Middle && scalePriority == true && switchPriority == false) {
 		if(gameData.charAt(0) == 'L') {
@@ -168,6 +186,7 @@ public void autonomousPathfinding(String gameData, boolean[] input) {
 		} else {
 			System.err.println("Couldn't determine gameData");
 		}
+
 	} else if(fieldPosition == Position.Middle && scalePriority == false && switchPriority == true) {
 		if(gameData.charAt(0) == 'L') {
 			// Put left auto code here with switch priority
@@ -176,16 +195,31 @@ public void autonomousPathfinding(String gameData, boolean[] input) {
 		} else {
 			System.err.println("Couldn't determine gameData");
 		}
-	} else if(fieldPosition == Position.Right && scalePriority == true && switchPriority == false) {
-		
 
+	} else if(fieldPosition == Position.Right && scalePriority == true && switchPriority == false) {
+		if(gameData.charAt(0) == 'L') {
+			// Put left auto code here with scale priority
+		} else if(gameData.charAt(0) == 'R') {
+			// Put right auto code here with switch priority
+		} else {
+			System.err.println("Couldn't determine gameData");
+		}
 
 	} else if(fieldPosition == Position.Right && scalePriority == false && switchPriority == true) {
-		
+		if(gameData.charAt(0) == 'L') {
+			// Put left auto code here with scale priority
+		} else if(gameData.charAt(0) == 'R') {
+			// Put right auto code here with switch priority
+		} else {
+			System.err.println("Couldn't determine gameData");
+		}
 
-
-	} else {
+	}	else if(fieldPosition == Position.Left && scalePriority == true && switchPriority == true) {
+		System.err.println("Both scalePriority and switvhPriority are enabled, check robot's switch states or wiring");
+	
+	} else  {
 		System.err.println("Couldn't determine fieldPosition and priority");
+
 	}
 
 	// if (getStartingMode[0] == false && getStartingMode[1] == false &&
