@@ -133,7 +133,7 @@ public class Robot extends IterativeRobot {
 
 		if (input[3]) {
 			autonomousStraight = true;
-			System.out.println("go straight");
+			System.out.println("Go straight");
 		} else if (input[4]) {
 			scalePriority = true;
 			System.out.println("Target scale");
@@ -180,7 +180,7 @@ public class Robot extends IterativeRobot {
 		} else if (fieldPosition == Position.Middle) {
 
 			if (autonomousStraight) {
-				System.out.println("go straight");
+				System.out.println("Cross base line");
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
 					// Put left auto code here with scale priority
@@ -202,7 +202,7 @@ public class Robot extends IterativeRobot {
 		} else if (fieldPosition == Position.Right) {
 
 			if (autonomousStraight) {
-				System.out.println("go straight");
+				System.out.println("Go straight");
 			} else if (scalePriority) {
 				if(gameData.charAt(1) == 'L') {
 					// Put autonomous straight code here
@@ -225,6 +225,9 @@ public class Robot extends IterativeRobot {
 
 		//TODO: It doesn't help us to do nothing when the switches are set incorrectly
 		// so do the bare minimum in case of human error by the driveteam (go straight)
+		
+		// 5-4-5 feet to cross base line in middle positions
+		// 7 feet to go straight 
 	}
 
 	/**
@@ -284,6 +287,22 @@ public class Robot extends IterativeRobot {
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
+	
+	@Override
+	public void testInit() {
+		DTEncFL.reset();
+		DTEncFR.reset();
+		DTEncRL.reset();
+		DTEncRR.reset();
+	}
+	
+	@Override
+	public void testPeriodic() {
+		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
+				joystick.getTrigger());
+		
+		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
+	}
 
 	//TODO: Implement PID Feedback & Control 
 
@@ -298,7 +317,7 @@ public class Robot extends IterativeRobot {
 			   Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit) &&
 			   Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) &&
 			   !teleOpCalled && autotime.get() < 15) {
-			drivetrain.driveLinearX(speed);
+			driveTrain.driveLinearX(speed);
 		}
 	}
 
@@ -313,7 +332,7 @@ public class Robot extends IterativeRobot {
 			   Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit) &&
 			   Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) &&
 			   !teleOpCalled && autotime.get() < 15) {
-			drivetrain.driveLinearY(speed);
+			driveTrain.driveLinearY(speed);
 		}
 	}
 
@@ -328,7 +347,7 @@ public class Robot extends IterativeRobot {
 			   Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit) &&
 			   Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) &&
 			   !teleOpCalled && autotime.get() < 15) {
-			drivetrain.driveRotational(speed);
+			driveTrain.driveRotational(speed);
 		}
 	}
 }
