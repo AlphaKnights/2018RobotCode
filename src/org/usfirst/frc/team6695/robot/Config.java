@@ -10,6 +10,7 @@ public final class Config {
 	static final int LiftRightMotor = 5;
 	static final int LiftLeftMotor = 6;
 	static final int liftGrabberMotor = 7;
+	static final int ForkLiftMotor = 9;
 
 	static final int JoystickChannel = 0;
 	static final int XBoxChannel = 1;

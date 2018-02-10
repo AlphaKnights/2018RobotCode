@@ -23,6 +23,8 @@ public class Robot extends IterativeRobot {
 	TalonSRX leftBoxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
 
+	TalonSRX forkLiftMotor;
+
 	ModeSelector switches;
 	Position fieldPosition;
 
@@ -56,6 +58,8 @@ public class Robot extends IterativeRobot {
 		rightBoxLiftMotor = new TalonSRX(Config.LiftRightMotor);
 		leftBoxLiftMotor = new TalonSRX(Config.LiftLeftMotor);
 		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
+
+		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
 
 		rightBoxLiftMotor.enableCurrentLimit(false);
 		leftBoxLiftMotor.enableCurrentLimit(false);
@@ -298,6 +302,13 @@ public class Robot extends IterativeRobot {
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+	}
+
+	public void robotForkLift(boolean goUp, boolean goDown) {
+		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
+		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
+		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
+
 	}
 
 	@Override
