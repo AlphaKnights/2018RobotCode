@@ -2,6 +2,7 @@ package org.usfirst.frc.team6695.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
@@ -9,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends IterativeRobot {
@@ -39,6 +41,7 @@ public class Robot extends IterativeRobot {
 		Middle,
 		Right;
 	}
+	AHRS navx;
 
 	@Override
 	public void robotInit() {
@@ -77,6 +80,13 @@ public class Robot extends IterativeRobot {
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
 
 		autotime = new Timer();
+    
+    try {
+			navx = new AHRS(SPI.Port.kMXP);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("YO YO YO! That Navx board is not working!!!");
+		}
 	}
 
 	boolean teleOpCalled = false;
