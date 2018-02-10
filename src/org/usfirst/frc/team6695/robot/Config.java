@@ -13,7 +13,7 @@ public final class Config {
 
 	static final int JoystickChannel = 0;
 	static final int XBoxChannel = 1;
-  
+
 	static final int EncoderTopValue = 10000;
 	static final int LiftLeftEncoderPort = 1; // TODO: PLACEHOLDER
 	static final int LiftRightEncoderPort = 2; // TODO: PLACEHOLDER

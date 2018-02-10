@@ -41,6 +41,7 @@ public class Robot extends IterativeRobot {
 		Middle,
 		Right;
 	}
+
 	AHRS navx;
 
 	@Override
@@ -80,8 +81,8 @@ public class Robot extends IterativeRobot {
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
 
 		autotime = new Timer();
-    
-    try {
+
+		try {
 			navx = new AHRS(SPI.Port.kMXP);
 		} catch (Exception e) {
 			e.printStackTrace();
