@@ -84,7 +84,7 @@ public class AlphaMDrive extends RobotDriveBase {
 	public void driveLinearY(double speed) {
 		Vector2d input = new Vector2d(0.0, speed);
 		input.rotate(-90);
-		
+
 		double[] wheelSpeeds = new double[4];
 		wheelSpeeds[MotorType.kFrontLeft.value] = input.y;
 		wheelSpeeds[MotorType.kFrontRight.value] = -input.y;
@@ -101,7 +101,7 @@ public class AlphaMDrive extends RobotDriveBase {
 	public void driveLinearX(double speed) {
 		Vector2d input = new Vector2d(speed, 0.0);
 		input.rotate(-90);
-		
+
 		double[] wheelSpeeds = new double[4];
 		wheelSpeeds[MotorType.kFrontLeft.value] = input.x;
 		wheelSpeeds[MotorType.kFrontRight.value] = input.x;

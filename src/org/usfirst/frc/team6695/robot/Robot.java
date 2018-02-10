@@ -64,7 +64,7 @@ public class Robot extends IterativeRobot {
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
 
-		switches = new ModeSelector(1, 2, 3, 4, 5, 6, 7, 8);
+		switches = new ModeSelector(10, 11, 12, 14, 15, 16, 17, 19);
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
 
@@ -154,7 +154,8 @@ public class Robot extends IterativeRobot {
 			Thread.currentThread().interrupt();
 		}
 
-		// TODO: Verify the logic of gameData and if switchPriority or scalePriority interferes with it
+		// TODO: Verify the logic of gameData and if switchPriority or scalePriority
+		// interferes with it
 		if (fieldPosition == Position.Left) {
 
 			if (autonomousStraight) {
@@ -184,7 +185,7 @@ public class Robot extends IterativeRobot {
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
 					// Put left auto code here with scale priority
-				} else if(gameData.charAt(1) == 'R') {
+				} else if (gameData.charAt(1) == 'R') {
 					// Put right auto code here with scale priority
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(1)");
@@ -204,17 +205,17 @@ public class Robot extends IterativeRobot {
 			if (autonomousStraight) {
 				System.out.println("Go straight");
 			} else if (scalePriority) {
-				if(gameData.charAt(1) == 'L') {
+				if (gameData.charAt(1) == 'L') {
 					// Put autonomous straight code here
-				} else if(gameData.charAt(1) == 'R') {
+				} else if (gameData.charAt(1) == 'R') {
 					// Put right auto code here with scale priority
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(1)");
 				}
 			} else if (switchPriority) {
-				if(gameData.charAt(0) == 'L') {
+				if (gameData.charAt(0) == 'L') {
 					// Put autonomous straight code here
-				} else if(gameData.charAt(0) == 'R') {
+				} else if (gameData.charAt(0) == 'R') {
 					// Put right auto code here with switch priority
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(0)");
@@ -223,11 +224,11 @@ public class Robot extends IterativeRobot {
 
 		}
 
-		//TODO: It doesn't help us to do nothing when the switches are set incorrectly
+		// TODO: It doesn't help us to do nothing when the switches are set incorrectly
 		// so do the bare minimum in case of human error by the driveteam (go straight)
-		
+
 		// 5-4-5 feet to cross base line in middle positions
-		// 7 feet to go straight 
+		// 7 feet to go straight
 	}
 
 	/**
@@ -287,7 +288,7 @@ public class Robot extends IterativeRobot {
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
-	
+
 	@Override
 	public void testInit() {
 		DTEncFL.reset();
@@ -295,16 +296,24 @@ public class Robot extends IterativeRobot {
 		DTEncRL.reset();
 		DTEncRR.reset();
 	}
-	
+
 	@Override
 	public void testPeriodic() {
-		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
-				joystick.getTrigger());
-		
-		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
+		// driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(),
+		// joystick.getZ(), -90, joystick.getThrottle(),
+		// joystick.getTrigger());
+		//
+		// System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " +
+		// DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " +
+		// DTEncRR.get());
+		System.out.println();
+		for (boolean c : switches.getSwitches()) {
+			System.out.print(c + " ");
+		}
+		System.out.println();
 	}
 
-	//TODO: Implement PID Feedback & Control 
+	// TODO: Implement PID Feedback & Control
 
 	public void DriveX(double speed, double feet) {
 		DTEncFL.reset();
@@ -312,11 +321,10 @@ public class Robot extends IterativeRobot {
 		DTEncRL.reset();
 		DTEncRR.reset();
 
-		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) &&
-			   !teleOpCalled && autotime.get() < 15) {
+		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
 			driveTrain.driveLinearX(speed);
 		}
 	}
@@ -327,11 +335,10 @@ public class Robot extends IterativeRobot {
 		DTEncRL.reset();
 		DTEncRR.reset();
 
-		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit) &&
-			   Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) &&
-			   !teleOpCalled && autotime.get() < 15) {
+		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
 			driveTrain.driveLinearY(speed);
 		}
 	}
@@ -342,11 +349,11 @@ public class Robot extends IterativeRobot {
 		DTEncRL.reset();
 		DTEncRR.reset();
 
-		while (Math.abs(DTEncFL.get()) < Math.abs(degrees * Config.degUnit) &&
-			   Math.abs(DTEncFR.get()) < Math.abs(degrees * Config.degUnit) &&
-			   Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit) &&
-			   Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) &&
-			   !teleOpCalled && autotime.get() < 15) {
+		while (Math.abs(DTEncFL.get()) < Math.abs(degrees * Config.degUnit)
+				&& Math.abs(DTEncFR.get()) < Math.abs(degrees * Config.degUnit)
+				&& Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit)
+				&& Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) && !teleOpCalled
+				&& autotime.get() < 15) {
 			driveTrain.driveRotational(speed);
 		}
 	}
