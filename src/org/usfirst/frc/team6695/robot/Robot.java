@@ -68,7 +68,7 @@ public class Robot extends IterativeRobot {
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
 
-		switches = new ModeSelector(10, 11, 12, 14, 15, 16, 17, 19);
+		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
 
