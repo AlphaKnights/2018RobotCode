@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
 
@@ -22,9 +23,24 @@ public class Robot extends IterativeRobot {
 	TalonSRX leftBoxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
 
+	ModeSelector switches;
+	Position fieldPosition;
+
 	Counter LiftLeftEncoder;
 	Counter LiftRightEncoder;
 
+	Counter DTEncFR;
+	Counter DTEncFL;
+	Counter DTEncRL;
+	Counter DTEncRR;
+
+	Timer autotime;
+
+	public enum Position {
+		Left,
+		Middle,
+		Right;
+	}
 	AHRS navx;
 
 	@Override
@@ -50,17 +66,34 @@ public class Robot extends IterativeRobot {
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(.1);
+
+		switches = new ModeSelector(10, 11, 12, 14, 15, 16, 17, 19);
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
 
 		LiftLeftEncoder = new Counter(Config.LiftLeftEncoderPort);
 		LiftRightEncoder = new Counter(Config.LiftRightEncoderPort);
-		try {
+
+		DTEncFR = new Counter(Config.DrivetrainEncoderFrontRight);
+		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
+		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
+		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
+
+		autotime = new Timer();
+    
+    try {
 			navx = new AHRS(SPI.Port.kMXP);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("YO YO YO! That Navx board is not working!!!");
 		}
+	}
+
+	boolean teleOpCalled = false;
+
+	@Override
+	public void teleopInit() {
+		teleOpCalled = true;
 	}
 
 	@Override
@@ -71,49 +104,141 @@ public class Robot extends IterativeRobot {
 		// System.out.println(c.get());
 	}
 
-	// @Override
-	// public void autonomousInit() {
-	// //
-	// https://wpilib.screenstepslive.com/s/currentCS/m/getting_started/l/826278-2018-game-data-details
-	//
-	// }
 	@Override
 	public void autonomousInit() {
+		autotime.reset();
+		autotime.start();
 
-		String gameData;
-		gameData = DriverStation.getInstance().getGameSpecificMessage();
-
-		LEFT: // starting position 'Left'
-		if (gameData.charAt(0) == 'L') { // L-- (always going for switch)
-			// put switch code for L here
-		} else { // R-- (never go for switch)
-			if (gameData.charAt(1) == 'L') { // RL-
-				// put scale code for L here
-			} else { // RR-
-
-				// idk :)
-			}
-		}
-		CENTER: // starting position 'Center'
-		if (gameData.charAt(0) == 'L') { // L--
-			// put switch code for C here
-		} else { // R--
-			// put switch code for C here
-		}
-		RIGHT: // starting position 'Right'
-		if (gameData.charAt(0) == 'L') { // L--
-			if (gameData.charAt(1) == 'L') { // LL-
-				// idk :
-			} else { // LR-
-				// put scale code for L here
-			}
-		} else { // R-- (always go for switch)
-			// put switch code for R here
-		}
+		String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		autonomousPathfinding(gameData, switches.getSwitches());
 	}
 
-	@Override
-	public void autonomousPeriodic() {
+	/** Go to the scale */
+	boolean scalePriority = false;
+	/** Go to the switch */
+	boolean switchPriority = false;
+	/** Cross the line */
+	boolean autonomousStraight = false;
+
+	public void autonomousPathfinding(String gameData, boolean[] input) {
+		// 0 - left
+		// 1 - middle
+		// 2 - right
+		// 3 - straight only
+		// 4 - target scale
+		// 5 - target switch
+		// 6 - delay 2s
+		// 7 - delay 5s
+
+		// TODO: break on autonomous end
+		if (input[0]) {
+			fieldPosition = Position.Left;
+		} else if (input[1]) {
+			fieldPosition = Position.Middle;
+		} else if (input[2]) {
+			fieldPosition = Position.Right;
+		} else {
+			System.err.println("Couldn't determine fieldPosition");
+		}
+
+		if (input[3]) {
+			autonomousStraight = true;
+			System.out.println("Go straight");
+		} else if (input[4]) {
+			scalePriority = true;
+			System.out.println("Target scale");
+		} else if (input[5]) {
+			switchPriority = true;
+			System.out.println("Target switch");
+		}
+
+		if (input[6]) try {
+			Thread.sleep(2000);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+
+		if (input[7]) try {
+			Thread.sleep(5000);
+		} catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+		}
+
+		// TODO: Verify the logic of gameData and if switchPriority or scalePriority
+		// interferes with it
+		if (fieldPosition == Position.Left) {
+
+			if (autonomousStraight) {
+				System.out.println("go straight");
+			} else if (scalePriority) {
+				if (gameData.charAt(1) == 'L') {
+					// Put left auto code here with scale priority
+				} else if (gameData.charAt(1) == 'R') {
+					// Put autonomous straight code here
+				} else {
+					System.err.println("Couldn't determine gameData.charAt(1)");
+				}
+			} else if (switchPriority) {
+				if (gameData.charAt(0) == 'L') {
+					// Put left auto code here with switch priority
+				} else if (gameData.charAt(0) == 'R') {
+					// Put autonomous straight code here
+				} else {
+					System.err.println("Couldn't determine gameData.charAt(0)");
+				}
+			}
+
+		} else if (fieldPosition == Position.Middle) {
+
+			if (autonomousStraight) {
+				System.out.println("Cross base line");
+			} else if (scalePriority) {
+				if (gameData.charAt(1) == 'L') {
+					// Put left auto code here with scale priority
+				} else if (gameData.charAt(1) == 'R') {
+					// Put right auto code here with scale priority
+				} else {
+					System.err.println("Couldn't determine gameData.charAt(1)");
+				}
+			} else if (switchPriority) {
+				if (gameData.charAt(0) == 'L') {
+					// Put left auto code here with switch priority
+				} else if (gameData.charAt(0) == 'R') {
+					// Put right auto code here with switch priority
+				} else {
+					System.err.println("Couldn't determine gameData.charAt(0)");
+				}
+			}
+
+		} else if (fieldPosition == Position.Right) {
+
+			if (autonomousStraight) {
+				System.out.println("Go straight");
+			} else if (scalePriority) {
+				if (gameData.charAt(1) == 'L') {
+					// Put autonomous straight code here
+				} else if (gameData.charAt(1) == 'R') {
+					// Put right auto code here with scale priority
+				} else {
+					System.err.println("Couldn't determine gameData.charAt(1)");
+				}
+			} else if (switchPriority) {
+				if (gameData.charAt(0) == 'L') {
+					// Put autonomous straight code here
+				} else if (gameData.charAt(0) == 'R') {
+					// Put right auto code here with switch priority
+				} else {
+					System.err.println("Couldn't determine gameData.charAt(0)");
+				}
+			}
+
+		}
+
+		// TODO: It doesn't help us to do nothing when the switches are set incorrectly
+		// so do the bare minimum in case of human error by the driveteam (go straight)
+
+		// 5-4-5 feet to cross base line in middle positions
+		// 7 feet to go straight
 	}
 
 	/**
@@ -172,5 +297,74 @@ public class Robot extends IterativeRobot {
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+	}
+
+	@Override
+	public void testInit() {
+		DTEncFL.reset();
+		DTEncFR.reset();
+		DTEncRL.reset();
+		DTEncRR.reset();
+	}
+
+	@Override
+	public void testPeriodic() {
+		// driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(),
+		// joystick.getZ(), -90, joystick.getThrottle(),
+		// joystick.getTrigger());
+		//
+		// System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " +
+		// DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " +
+		// DTEncRR.get());
+		System.out.println();
+		for (boolean c : switches.getSwitches()) {
+			System.out.print(c + " ");
+		}
+		System.out.println();
+	}
+
+	// TODO: Implement PID Feedback & Control
+
+	public void DriveX(double speed, double feet) {
+		DTEncFL.reset();
+		DTEncFR.reset();
+		DTEncRL.reset();
+		DTEncRR.reset();
+
+		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
+			driveTrain.driveLinearX(speed);
+		}
+	}
+
+	public void DriveY(double speed, double feet) {
+		DTEncFL.reset();
+		DTEncFR.reset();
+		DTEncRL.reset();
+		DTEncRR.reset();
+
+		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
+				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
+			driveTrain.driveLinearY(speed);
+		}
+	}
+
+	public void DriveRotational(double speed, double degrees) {
+		DTEncFL.reset();
+		DTEncFR.reset();
+		DTEncRL.reset();
+		DTEncRR.reset();
+
+		while (Math.abs(DTEncFL.get()) < Math.abs(degrees * Config.degUnit)
+				&& Math.abs(DTEncFR.get()) < Math.abs(degrees * Config.degUnit)
+				&& Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit)
+				&& Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) && !teleOpCalled
+				&& autotime.get() < 15) {
+			driveTrain.driveRotational(speed);
+		}
 	}
 }
