@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
@@ -35,6 +37,11 @@ public class Robot extends IterativeRobot {
 	Counter DTEncFL;
 	Counter DTEncRL;
 	Counter DTEncRR;
+	
+	PIDController DTFRPID;
+	PIDController DTFLPID;
+	PIDController DTRLPID;
+	PIDController DTRRPID;
 
 	Timer autotime;
 
@@ -83,6 +90,12 @@ public class Robot extends IterativeRobot {
 		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
 		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
+		
+		//kp, ki, kd, kf, source, output, period
+		DTFRPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncFR, (PIDOutput) frontRight, 0.02);
+		DTFLPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncFL, (PIDOutput) frontRight, 0.02);
+		DTRRPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncRL, (PIDOutput) frontRight, 0.02);
+		DTRLPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncRR, (PIDOutput) frontRight, 0.02);
 
 		autotime = new Timer();
 
@@ -143,7 +156,7 @@ public class Robot extends IterativeRobot {
 		} else if (input[2]) {
 			fieldPosition = Position.Right;
 		} else {
-			System.err.println("Couldn't determine fieldPosition");
+			fieldPosition = null;
 		}
 
 		if (input[3]) {
@@ -187,7 +200,7 @@ public class Robot extends IterativeRobot {
 				if (gameData.charAt(0) == 'L') {
 					// Put left auto code here with switch priority
 				} else if (gameData.charAt(0) == 'R') {
-					// Put autonomous straight code here
+					DriveX(.5, 10);
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(0)");
 				}
@@ -229,7 +242,7 @@ public class Robot extends IterativeRobot {
 				}
 			} else if (switchPriority) {
 				if (gameData.charAt(0) == 'L') {
-					// Put autonomous straight code here
+					DriveX(0.5, 10);
 				} else if (gameData.charAt(0) == 'R') {
 					// Put right auto code here with switch priority
 				} else {
@@ -237,6 +250,8 @@ public class Robot extends IterativeRobot {
 				}
 			}
 
+		} else {
+			System.out.println("Go straight");
 		}
 
 		// TODO: It doesn't help us to do nothing when the switches are set incorrectly
@@ -308,7 +323,6 @@ public class Robot extends IterativeRobot {
 		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
 		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
-
 	}
 
 	@Override
@@ -321,13 +335,9 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void testPeriodic() {
-		// driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(),
-		// joystick.getZ(), -90, joystick.getThrottle(),
-		// joystick.getTrigger());
-		//
-		// System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " +
-		// DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " +
-		// DTEncRR.get());
+		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(), joystick.getTrigger());
+		
+		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
 		System.out.println();
 		for (boolean c : switches.getSwitches()) {
 			System.out.print(c + " ");
