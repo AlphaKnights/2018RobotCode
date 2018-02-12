@@ -3,6 +3,7 @@ package org.usfirst.frc.team6695.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.drive.RobotDriveBase;
 import edu.wpi.first.wpilibj.drive.Vector2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
@@ -81,7 +82,7 @@ public class AlphaMDrive extends RobotDriveBase {
 		m_safetyHelper.feed();
 	}
 
-	public void driveLinearY(double speed) {
+	public void driveLinearY(double speed, PIDController frontLeftPID, PIDController frontRightPID, PIDController rearLeftPID, PIDController rearRightPID) {
 		Vector2d input = new Vector2d(0.0, speed);
 		input.rotate(-90);
 
@@ -92,13 +93,13 @@ public class AlphaMDrive extends RobotDriveBase {
 		wheelSpeeds[MotorType.kRearRight.value] = -input.y;
 
 		normalize(wheelSpeeds);
-		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
-		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
-		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
-		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
-	public void driveLinearX(double speed) {
+	public void driveLinearX(double speed, PIDController frontLeftPID, PIDController frontRightPID, PIDController rearLeftPID, PIDController rearRightPID) {
 		Vector2d input = new Vector2d(speed, 0.0);
 		input.rotate(-90);
 
@@ -109,13 +110,13 @@ public class AlphaMDrive extends RobotDriveBase {
 		wheelSpeeds[MotorType.kRearRight.value] = -input.x;
 
 		normalize(wheelSpeeds);
-		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
-		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
-		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
-		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
-	public void driveRotational(double speed) {
+	public void driveRotational(double speed, PIDController frontLeftPID, PIDController frontRightPID, PIDController rearLeftPID, PIDController rearRightPID) {
 		double[] wheelSpeeds = new double[4];
 		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
 		wheelSpeeds[MotorType.kFrontRight.value] = speed;
@@ -123,10 +124,10 @@ public class AlphaMDrive extends RobotDriveBase {
 		wheelSpeeds[MotorType.kRearRight.value] = speed;
 
 		normalize(wheelSpeeds);
-		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
-		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
-		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
-		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
 	public void driveTurn(double zRotation, double gyroAngle, double throttle) {

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
@@ -37,6 +38,10 @@ public class Robot extends IterativeRobot {
 	Counter DTEncFL;
 	Counter DTEncRL;
 	Counter DTEncRR;
+	
+	private static final double Kp = 0.3;
+	private static final double Ki = 0.0;
+	private static final double Kd = 0.0;
 	
 	PIDController DTFRPID;
 	PIDController DTFLPID;
@@ -91,11 +96,21 @@ public class Robot extends IterativeRobot {
 		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
 		
-		//kp, ki, kd, kf, source, output, period
-		DTFRPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncFR, (PIDOutput) frontRight, 0.02);
-		DTFLPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncFL, (PIDOutput) frontRight, 0.02);
-		DTRRPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncRL, (PIDOutput) frontRight, 0.02);
-		DTRLPID = new PIDController(0.0, 0.0, 0.0, 0.0, DTEncRR, (PIDOutput) frontRight, 0.02);
+		//kp, ki, kd, source, output
+		DTFRPID = new PIDController(Kp, Ki, Kd, DTEncFR, new RateControlledMotor(frontRight));
+		DTFLPID = new PIDController(Kp, Ki, Kd, DTEncFL, new RateControlledMotor(frontLeft));
+		DTRRPID = new PIDController(Kp, Ki, Kd, DTEncRL, new RateControlledMotor(rearLeft));
+		DTRLPID = new PIDController(Kp, Ki, Kd, DTEncRR, new RateControlledMotor(rearRight));
+		
+		DTFRPID.enable();
+		DTFLPID.enable();
+		DTRRPID.enable();
+		DTRLPID.enable();
+		
+		SmartDashboard.putData("Front Right Wheel Speed PID", DTFRPID);
+		SmartDashboard.putData("Front Left Wheel Speed PID", DTFLPID);
+		SmartDashboard.putData("Rear Right Wheel Speed PID", DTRRPID);
+		SmartDashboard.putData("Rear Left Wheel Speed PID", DTFRPID);
 
 		autotime = new Timer();
 
@@ -345,8 +360,6 @@ public class Robot extends IterativeRobot {
 		System.out.println();
 	}
 
-	// TODO: Implement PID Feedback & Control
-
 	public void DriveX(double speed, double feet) {
 		DTEncFL.reset();
 		DTEncFR.reset();
@@ -357,7 +370,7 @@ public class Robot extends IterativeRobot {
 				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
-			driveTrain.driveLinearX(speed);
+			driveTrain.driveLinearX(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
 		}
 	}
 
@@ -371,7 +384,7 @@ public class Robot extends IterativeRobot {
 				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
-			driveTrain.driveLinearY(speed);
+			driveTrain.driveLinearY(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
 		}
 	}
 
@@ -386,7 +399,7 @@ public class Robot extends IterativeRobot {
 				&& Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit)
 				&& Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) && !teleOpCalled
 				&& autotime.get() < 15) {
-			driveTrain.driveRotational(speed);
+			driveTrain.driveRotational(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
 		}
 	}
 }
