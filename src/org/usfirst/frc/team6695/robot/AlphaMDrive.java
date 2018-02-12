@@ -82,7 +82,8 @@ public class AlphaMDrive extends RobotDriveBase {
 		m_safetyHelper.feed();
 	}
 
-	public void driveLinearY(double speed, PIDController frontLeftPID, PIDController frontRightPID, PIDController rearLeftPID, PIDController rearRightPID) {
+	public void driveLinearY(double speed, PIDController frontLeftPID, PIDController frontRightPID,
+			PIDController rearLeftPID, PIDController rearRightPID) {
 		Vector2d input = new Vector2d(0.0, speed);
 		input.rotate(-90);
 
@@ -99,7 +100,8 @@ public class AlphaMDrive extends RobotDriveBase {
 		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
-	public void driveLinearX(double speed, PIDController frontLeftPID, PIDController frontRightPID, PIDController rearLeftPID, PIDController rearRightPID) {
+	public void driveLinearX(double speed, PIDController frontLeftPID, PIDController frontRightPID,
+			PIDController rearLeftPID, PIDController rearRightPID) {
 		Vector2d input = new Vector2d(speed, 0.0);
 		input.rotate(-90);
 
@@ -116,7 +118,8 @@ public class AlphaMDrive extends RobotDriveBase {
 		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
-	public void driveRotational(double speed, PIDController frontLeftPID, PIDController frontRightPID, PIDController rearLeftPID, PIDController rearRightPID) {
+	public void driveRotational(double speed, PIDController frontLeftPID, PIDController frontRightPID,
+			PIDController rearLeftPID, PIDController rearRightPID) {
 		double[] wheelSpeeds = new double[4];
 		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
 		wheelSpeeds[MotorType.kFrontRight.value] = speed;

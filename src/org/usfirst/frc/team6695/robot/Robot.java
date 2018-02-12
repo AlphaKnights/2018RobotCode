@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
@@ -38,11 +37,11 @@ public class Robot extends IterativeRobot {
 	Counter DTEncFL;
 	Counter DTEncRL;
 	Counter DTEncRR;
-	
+
 	private static final double Kp = 0.3;
 	private static final double Ki = 0.0;
 	private static final double Kd = 0.0;
-	
+
 	PIDController DTFRPID;
 	PIDController DTFLPID;
 	PIDController DTRLPID;
@@ -95,18 +94,18 @@ public class Robot extends IterativeRobot {
 		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
 		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
-		
-		//kp, ki, kd, source, output
+
+		// kp, ki, kd, source, output
 		DTFRPID = new PIDController(Kp, Ki, Kd, DTEncFR, new RateControlledMotor(frontRight));
 		DTFLPID = new PIDController(Kp, Ki, Kd, DTEncFL, new RateControlledMotor(frontLeft));
 		DTRRPID = new PIDController(Kp, Ki, Kd, DTEncRL, new RateControlledMotor(rearLeft));
 		DTRLPID = new PIDController(Kp, Ki, Kd, DTEncRR, new RateControlledMotor(rearRight));
-		
+
 		DTFRPID.enable();
 		DTFLPID.enable();
 		DTRRPID.enable();
 		DTRLPID.enable();
-		
+
 		SmartDashboard.putData("Front Right Wheel Speed PID", DTFRPID);
 		SmartDashboard.putData("Front Left Wheel Speed PID", DTFLPID);
 		SmartDashboard.putData("Rear Right Wheel Speed PID", DTRRPID);
@@ -350,9 +349,11 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void testPeriodic() {
-		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(), joystick.getTrigger());
-		
-		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: " + DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
+		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
+				joystick.getTrigger());
+
+		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: "
+				+ DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
 		System.out.println();
 		for (boolean c : switches.getSwitches()) {
 			System.out.print(c + " ");
