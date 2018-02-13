@@ -21,8 +21,7 @@ public class Robot extends IterativeRobot {
 	private Joystick joystick;
 	XboxController xbox;
 
-	TalonSRX rightBoxLiftMotor;
-	TalonSRX leftBoxLiftMotor;
+	TalonSRX boxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
 
 	TalonSRX forkLiftMotor;
@@ -30,8 +29,7 @@ public class Robot extends IterativeRobot {
 	ModeSelector switches;
 	Position fieldPosition;
 
-	Counter LiftLeftEncoder;
-	Counter LiftRightEncoder;
+	Counter boxLiftEncoder;
 
 	Counter DTEncFR;
 	Counter DTEncFL;
@@ -66,18 +64,15 @@ public class Robot extends IterativeRobot {
 		TalonSRX frontRight = new TalonSRX(Config.DriveTrainFrontRight);
 		TalonSRX rearRight = new TalonSRX(Config.DriveTrainRearRight);
 
-		rightBoxLiftMotor = new TalonSRX(Config.LiftRightMotor);
-		leftBoxLiftMotor = new TalonSRX(Config.LiftLeftMotor);
+		boxLiftMotor = new TalonSRX(Config.LiftMotor);
 		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
 
 		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
 
-		rightBoxLiftMotor.enableCurrentLimit(false);
-		leftBoxLiftMotor.enableCurrentLimit(false);
+		boxLiftMotor.enableCurrentLimit(false);
 		closingBoxLiftMotor.enableCurrentLimit(true);
 
-		rightBoxLiftMotor.configContinuousCurrentLimit(100, 500);
-		leftBoxLiftMotor.configContinuousCurrentLimit(100, 500);
+		boxLiftMotor.configContinuousCurrentLimit(100, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(2, 500);
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
@@ -87,8 +82,7 @@ public class Robot extends IterativeRobot {
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
 
-		LiftLeftEncoder = new Counter(Config.LiftLeftEncoderPort);
-		LiftRightEncoder = new Counter(Config.LiftRightEncoderPort);
+		boxLiftEncoder = new Counter(Config.LiftEncoderPort);
 
 		DTEncFR = new Counter(Config.DrivetrainEncoderFrontRight);
 		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
@@ -156,7 +150,7 @@ public class Robot extends IterativeRobot {
 		// 0 - left
 		// 1 - middle
 		// 2 - right
-		// 3 - straight only
+		// 3 - straight
 		// 4 - target scale
 		// 5 - target switch
 		// 6 - delay 2s
@@ -288,46 +282,16 @@ public class Robot extends IterativeRobot {
 	 *            Button to open the thing. Boolean Value
 	 */
 	public void boxLift(boolean goUp, boolean goDown, boolean close, boolean open) {
-		if (goDown) {
-			LiftLeftEncoder.setReverseDirection(true);
-			LiftRightEncoder.setReverseDirection(true);
-		}
-		if (goUp) {
-			LiftLeftEncoder.setReverseDirection(false);
-			LiftRightEncoder.setReverseDirection(false);
-		}
+		if (goDown) boxLiftEncoder.setReverseDirection(true);
+		if (goUp) boxLiftEncoder.setReverseDirection(false);
 
-		if (goUp) {
-			if ((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2 < Config.EncoderTopValue) {
-				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= Config.EncoderRange) {
-					rightBoxLiftMotor.set(ControlMode.PercentOutput, .5);
-					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= Config.EncoderRange) {
-					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-					leftBoxLiftMotor.set(ControlMode.PercentOutput, .5);
-				} else {
-					rightBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-					leftBoxLiftMotor.set(ControlMode.PercentOutput, 1);
-				}
-			}
-
-		} else if (goDown) {
-			if (((LiftRightEncoder.get() + LiftLeftEncoder.get()) / 2) < 4) {
-				if ((LiftRightEncoder.get() - LiftLeftEncoder.get()) >= Config.EncoderRange) {
-					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
-					leftBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
-				} else if ((LiftLeftEncoder.get() - LiftRightEncoder.get()) >= Config.EncoderRange) {
-					rightBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
-					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
-				} else {
-					rightBoxLiftMotor.set(ControlMode.PercentOutput, -1);
-					leftBoxLiftMotor.set(ControlMode.PercentOutput, -1);
-				}
-			}
-		} else {
-			rightBoxLiftMotor.set(ControlMode.PercentOutput, 0);
-			leftBoxLiftMotor.set(ControlMode.PercentOutput, 0);
-		}
+		if (goUp)
+			if (boxLiftEncoder.get() < Config.EncoderTopValue) boxLiftMotor.set(ControlMode.PercentOutput, 1);
+		else if (goDown)
+			if (boxLiftEncoder.get() < 10) boxLiftMotor.set(ControlMode.PercentOutput, -1);
+		else
+			boxLiftMotor.set(ControlMode.PercentOutput, 0);
+		
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
