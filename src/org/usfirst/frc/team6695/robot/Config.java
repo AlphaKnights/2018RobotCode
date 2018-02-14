@@ -15,18 +15,18 @@ public final class Config {
 	static final int XBoxChannel = 1;
 
 	static final int EncoderTopValue = 10000;
-	static final int LiftEncoderPort = 1; // TODO: PLACEHOLDER
+	static final int LiftEncoderPort = 20; // TODO: PLACEHOLDER
 	static final int EncoderRange = 200;
 
 	// 1 foot
-	static final double encUnit = 200 / (Math.PI / 2);
+	static final double encUnit = (529 + 541 + 578 + 655) / (11 * 4);
 
 	// 360 degrees
 	static final double degUnit = 100;
 
-	static final int DrivetrainEncoderFrontRight = 3; // TODO: PLACEHOLDER
-	static final int DrivetrainEncoderFrontLeft = 4; // TODO: PLACEHOLDER
-	static final int DrivetrainEncoderRearRight = 5; // TODO: PLACEHOLDER
-	static final int DrivetrainEncoderRearLeft = 6; // TODO: PLACEHOLDER
+	static final int DrivetrainEncoderFrontRight = 1;
+	static final int DrivetrainEncoderFrontLeft = 0;
+	static final int DrivetrainEncoderRearRight = 3;
+	static final int DrivetrainEncoderRearLeft = 2;
 
 }

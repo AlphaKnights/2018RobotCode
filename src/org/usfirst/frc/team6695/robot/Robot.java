@@ -54,15 +54,20 @@ public class Robot extends IterativeRobot {
 	}
 
 	AHRS navx;
-
+	
+	TalonSRX frontLeft;
+	TalonSRX rearLeft;
+	TalonSRX frontRight;
+	TalonSRX rearRight;
+	
 	@Override
 	public void robotInit() {
 		CameraServer.getInstance().startAutomaticCapture();
 
-		TalonSRX frontLeft = new TalonSRX(Config.DriveTrainFrontLeft);
-		TalonSRX rearLeft = new TalonSRX(Config.DriveTrainRearLeft);
-		TalonSRX frontRight = new TalonSRX(Config.DriveTrainFrontRight);
-		TalonSRX rearRight = new TalonSRX(Config.DriveTrainRearRight);
+		frontLeft = new TalonSRX(Config.DriveTrainFrontLeft);
+		rearLeft = new TalonSRX(Config.DriveTrainRearLeft);
+		frontRight = new TalonSRX(Config.DriveTrainFrontRight);
+		rearRight = new TalonSRX(Config.DriveTrainRearRight);
 
 		boxLiftMotor = new TalonSRX(Config.LiftMotor);
 		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
@@ -132,11 +137,15 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
+		
 		autotime.reset();
 		autotime.start();
 
-		String gameData = DriverStation.getInstance().getGameSpecificMessage();
-		autonomousPathfinding(gameData, switches.getSwitches());
+		//String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		//autonomousPathfinding(gameData, switches.getSwitches());
+		
+		//TEST CODE
+		DriveY(-.5, 10);
 	}
 
 	/** Go to the scale */
@@ -195,12 +204,12 @@ public class Robot extends IterativeRobot {
 		if (fieldPosition == Position.Left) {
 
 			if (autonomousStraight) {
-				System.out.println("go straight");
+				System.out.println("Go straight"); // Put left auto code here for straight
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
 					// Put left auto code here with scale priority
 				} else if (gameData.charAt(1) == 'R') {
-					// Put autonomous straight code here
+					// Put left auto code here for straight
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(1)");
 				}
@@ -209,6 +218,7 @@ public class Robot extends IterativeRobot {
 					// Put left auto code here with switch priority
 				} else if (gameData.charAt(0) == 'R') {
 					DriveX(.5, 10);
+					// Put left auto code here for straight
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(0)");
 				}
@@ -217,12 +227,12 @@ public class Robot extends IterativeRobot {
 		} else if (fieldPosition == Position.Middle) {
 
 			if (autonomousStraight) {
-				System.out.println("Cross base line");
+				System.out.println("Cross base line"); // Will never actually cross base line in middle position
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
-					// Put left auto code here with scale priority
+					// Put middle auto code here with left scale priority
 				} else if (gameData.charAt(1) == 'R') {
-					// Put right auto code here with scale priority
+					// Put middle auto code here with right scale priority
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(1)");
 				}
@@ -239,7 +249,7 @@ public class Robot extends IterativeRobot {
 		} else if (fieldPosition == Position.Right) {
 
 			if (autonomousStraight) {
-				System.out.println("Go straight");
+				System.out.println("Go straight"); // Go straight, through the middle, and stop
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
 					// Put autonomous straight code here

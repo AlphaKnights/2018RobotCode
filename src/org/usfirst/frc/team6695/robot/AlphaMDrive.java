@@ -88,16 +88,20 @@ public class AlphaMDrive extends RobotDriveBase {
 		input.rotate(-90);
 
 		double[] wheelSpeeds = new double[4];
-		wheelSpeeds[MotorType.kFrontLeft.value] = input.y;
-		wheelSpeeds[MotorType.kFrontRight.value] = -input.y;
-		wheelSpeeds[MotorType.kRearLeft.value] = input.y;
-		wheelSpeeds[MotorType.kRearRight.value] = -input.y;
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = -speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = speed;
+		wheelSpeeds[MotorType.kRearRight.value] = -speed;
 
 		normalize(wheelSpeeds);
-		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
-		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
-		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
-		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+//		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+//		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+//		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+//		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
 	public void driveLinearX(double speed, PIDController frontLeftPID, PIDController frontRightPID,
@@ -112,10 +116,14 @@ public class AlphaMDrive extends RobotDriveBase {
 		wheelSpeeds[MotorType.kRearRight.value] = -input.x;
 
 		normalize(wheelSpeeds);
-		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
-		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
-		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
-		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+//		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+//		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+//		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+//		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
 	public void driveRotational(double speed, PIDController frontLeftPID, PIDController frontRightPID,
@@ -127,10 +135,14 @@ public class AlphaMDrive extends RobotDriveBase {
 		wheelSpeeds[MotorType.kRearRight.value] = speed;
 
 		normalize(wheelSpeeds);
-		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
-		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
-		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
-		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+//		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+//		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+//		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+//		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
 	}
 
 	public void driveTurn(double zRotation, double gyroAngle, double throttle) {
