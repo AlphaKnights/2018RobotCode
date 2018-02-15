@@ -5,23 +5,24 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
-	private AlphaMDrive driveTrain;
-	private Joystick joystick;
+	public AlphaMDrive driveTrain;
+	Joystick joystick;
 	XboxController xbox;
 
 	TalonSRX boxLiftLeftMotor;
@@ -63,24 +64,32 @@ public class Robot extends IterativeRobot {
 	WPI_TalonSRX rearLeft;
 	WPI_TalonSRX frontRight;
 	WPI_TalonSRX rearRight;
-	Preferences prefs;
+
+	NetworkTableEntry DeadBandEntry;
+
+	public void tableSetup() {
+		NetworkTableInstance nts = NetworkTableInstance.getDefault();
+		NetworkTable table = nts.getTable("SmartDashboard");
+		DeadBandEntry = table.getEntry("deadband");
+		DeadBandEntry.setDouble(.1);
+	}
 
 	@Override
 	public void robotInit() {
-		prefs.getInstance();
-		//SmartDashboard.putData("hi",);
+		tableSetup();
+		
 		CameraServer.getInstance().startAutomaticCapture();
+		
+		frontLeft = new WPI_TalonSRX(Config.DriveTrainFrontLeft);
+		rearLeft = new WPI_TalonSRX(Config.DriveTrainRearLeft);
+		frontRight = new WPI_TalonSRX(Config.DriveTrainFrontRight);
+		rearRight = new WPI_TalonSRX(Config.DriveTrainRearRight);
 
-		frontLeft = new WPI_TalonSRX(prefs.getInt("Drive Train Front Left", Config.DriveTrainFrontLeft));
-		rearLeft = new WPI_TalonSRX(prefs.getInt("Drive Train Rear Left", Config.DriveTrainRearLeft));
-		frontRight = new WPI_TalonSRX(prefs.getInt("Drive Train Front Right", Config.DriveTrainFrontRight));
-		rearRight = new WPI_TalonSRX(prefs.getInt("Drive Train Rear Right",Config.DriveTrainRearRight));
+		boxLiftLeftMotor = new TalonSRX(Config.LiftLeftMotor);
+		boxLiftRightMotor = new TalonSRX(Config.LiftRightMotor);
+		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
 
-		boxLiftLeftMotor = new TalonSRX(prefs.getInt("Box Lift Left Motor",Config.LiftLeftMotor));
-		boxLiftRightMotor = new TalonSRX(prefs.getInt("Box Lift Right Motor",Config.LiftRightMotor));
-		closingBoxLiftMotor = new TalonSRX(prefs.getInt("Box Lift Closeing Motor", Config.liftGrabberMotor));
-
-		forkLiftMotor = new TalonSRX(prefs.getInt("Fork Lift Motor", Config.ForkLiftMotor));
+		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
 
 		boxLiftLeftMotor.enableCurrentLimit(false);
 		boxLiftRightMotor.enableCurrentLimit(false);
@@ -90,8 +99,8 @@ public class Robot extends IterativeRobot {
 		boxLiftRightMotor.configContinuousCurrentLimit(100, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(2, 500);
 
-		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
-		driveTrain.setDeadband(.1);
+		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput); //Might need to be put teliop init i think...
+		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		joystick = new Joystick(Config.JoystickChannel);
@@ -327,6 +336,11 @@ public class Robot extends IterativeRobot {
 		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
 		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
+	}
+
+	public void updateFromDashboard(boolean update) { // TODO
+		if (!update) return;
+		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 	}
 
 	@Override
