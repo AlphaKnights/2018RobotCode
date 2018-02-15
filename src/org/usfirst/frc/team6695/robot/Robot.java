@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
@@ -77,9 +76,9 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void robotInit() {
 		tableSetup();
-		
+
 		CameraServer.getInstance().startAutomaticCapture();
-		
+
 		frontLeft = new WPI_TalonSRX(Config.DriveTrainFrontLeft);
 		rearLeft = new WPI_TalonSRX(Config.DriveTrainRearLeft);
 		frontRight = new WPI_TalonSRX(Config.DriveTrainFrontRight);
@@ -99,7 +98,8 @@ public class Robot extends IterativeRobot {
 		boxLiftRightMotor.configContinuousCurrentLimit(100, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(2, 500);
 
-		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput); //Might need to be put teliop init i think...
+		// Might need to be put teliop init i think...
+		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
