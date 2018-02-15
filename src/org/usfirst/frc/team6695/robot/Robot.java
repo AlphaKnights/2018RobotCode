@@ -2,6 +2,7 @@ package org.usfirst.frc.team6695.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.CameraServer;
@@ -10,8 +11,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -55,26 +58,29 @@ public class Robot extends IterativeRobot {
 	}
 
 	AHRS navx;
-	
-	TalonSRX frontLeft;
-	TalonSRX rearLeft;
-	TalonSRX frontRight;
-	TalonSRX rearRight;
-	
+
+	WPI_TalonSRX frontLeft;
+	WPI_TalonSRX rearLeft;
+	WPI_TalonSRX frontRight;
+	WPI_TalonSRX rearRight;
+	Preferences prefs;
+
 	@Override
 	public void robotInit() {
+		prefs.getInstance();
+		//SmartDashboard.putData("hi",);
 		CameraServer.getInstance().startAutomaticCapture();
 
-		frontLeft = new TalonSRX(Config.DriveTrainFrontLeft);
-		rearLeft = new TalonSRX(Config.DriveTrainRearLeft);
-		frontRight = new TalonSRX(Config.DriveTrainFrontRight);
-		rearRight = new TalonSRX(Config.DriveTrainRearRight);
+		frontLeft = new WPI_TalonSRX(prefs.getInt("Drive Train Front Left", Config.DriveTrainFrontLeft));
+		rearLeft = new WPI_TalonSRX(prefs.getInt("Drive Train Rear Left", Config.DriveTrainRearLeft));
+		frontRight = new WPI_TalonSRX(prefs.getInt("Drive Train Front Right", Config.DriveTrainFrontRight));
+		rearRight = new WPI_TalonSRX(prefs.getInt("Drive Train Rear Right",Config.DriveTrainRearRight));
 
-		boxLiftLeftMotor = new TalonSRX(Config.LiftLeftMotor);
-		boxLiftRightMotor = new TalonSRX(Config.LiftRightMotor);
-		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
+		boxLiftLeftMotor = new TalonSRX(prefs.getInt("Box Lift Left Motor",Config.LiftLeftMotor));
+		boxLiftRightMotor = new TalonSRX(prefs.getInt("Box Lift Right Motor",Config.LiftRightMotor));
+		closingBoxLiftMotor = new TalonSRX(prefs.getInt("Box Lift Closeing Motor", Config.liftGrabberMotor));
 
-		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
+		forkLiftMotor = new TalonSRX(prefs.getInt("Fork Lift Motor", Config.ForkLiftMotor));
 
 		boxLiftLeftMotor.enableCurrentLimit(false);
 		boxLiftRightMotor.enableCurrentLimit(false);
@@ -99,10 +105,10 @@ public class Robot extends IterativeRobot {
 		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
 
 		// kp, ki, kd, source, output
-		DTFRPID = new PIDController(Kp, Ki, Kd, DTEncFR, new RateControlledMotor(frontRight));
-		DTFLPID = new PIDController(Kp, Ki, Kd, DTEncFL, new RateControlledMotor(frontLeft));
-		DTRRPID = new PIDController(Kp, Ki, Kd, DTEncRL, new RateControlledMotor(rearLeft));
-		DTRLPID = new PIDController(Kp, Ki, Kd, DTEncRR, new RateControlledMotor(rearRight));
+		DTFRPID = new PIDController(Kp, Ki, Kd, DTEncFR, frontRight);
+		DTFLPID = new PIDController(Kp, Ki, Kd, DTEncFL, frontLeft);
+		DTRRPID = new PIDController(Kp, Ki, Kd, DTEncRL, rearLeft);
+		DTRLPID = new PIDController(Kp, Ki, Kd, DTEncRR, rearRight);
 
 		DTFRPID.enable();
 		DTFLPID.enable();
@@ -141,14 +147,14 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
-		
+
 		autotime.reset();
 		autotime.start();
 
-		//String gameData = DriverStation.getInstance().getGameSpecificMessage();
-		//autonomousPathfinding(gameData, switches.getSwitches());
-		
-		//TEST CODE
+		// String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		// autonomousPathfinding(gameData, switches.getSwitches());
+
+		// TEST CODE
 		DriveY(-.5, 3);
 		DriveX(.5, 4);
 		DriveY(-.5, 5);
@@ -301,21 +307,17 @@ public class Robot extends IterativeRobot {
 		if (goDown) boxLiftEncoder.setReverseDirection(true);
 		if (goUp) boxLiftEncoder.setReverseDirection(false);
 
-		if (goUp)
-			if (boxLiftEncoder.get() < Config.EncoderTopValue) {
-				boxLiftLeftMotor.set(ControlMode.PercentOutput, 1);
-				boxLiftRightMotor.set(ControlMode.PercentOutput, 1);
-			}
-		else if (goDown)
-			if (boxLiftEncoder.get() < 10) {
-				boxLiftLeftMotor.set(ControlMode.PercentOutput, -1);
-				boxLiftRightMotor.set(ControlMode.PercentOutput, -1);
-			}
-		else {
+		if (goUp) if (boxLiftEncoder.get() < Config.EncoderTopValue) {
+			boxLiftLeftMotor.set(ControlMode.PercentOutput, 1);
+			boxLiftRightMotor.set(ControlMode.PercentOutput, 1);
+		} else if (goDown) if (boxLiftEncoder.get() < 10) {
+			boxLiftLeftMotor.set(ControlMode.PercentOutput, -1);
+			boxLiftRightMotor.set(ControlMode.PercentOutput, -1);
+		} else {
 			boxLiftLeftMotor.set(ControlMode.PercentOutput, 0);
 			boxLiftRightMotor.set(ControlMode.PercentOutput, 0);
 		}
-		
+
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
