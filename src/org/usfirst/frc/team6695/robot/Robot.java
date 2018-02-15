@@ -21,7 +21,8 @@ public class Robot extends IterativeRobot {
 	private Joystick joystick;
 	XboxController xbox;
 
-	TalonSRX boxLiftMotor;
+	TalonSRX boxLiftLeftMotor;
+	TalonSRX boxLiftRightMotor;
 	TalonSRX closingBoxLiftMotor;
 
 	TalonSRX forkLiftMotor;
@@ -69,15 +70,18 @@ public class Robot extends IterativeRobot {
 		frontRight = new TalonSRX(Config.DriveTrainFrontRight);
 		rearRight = new TalonSRX(Config.DriveTrainRearRight);
 
-		boxLiftMotor = new TalonSRX(Config.LiftMotor);
+		boxLiftLeftMotor = new TalonSRX(Config.LiftLeftMotor);
+		boxLiftRightMotor = new TalonSRX(Config.LiftRightMotor);
 		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
 
 		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
 
-		boxLiftMotor.enableCurrentLimit(false);
+		boxLiftLeftMotor.enableCurrentLimit(false);
+		boxLiftRightMotor.enableCurrentLimit(false);
 		closingBoxLiftMotor.enableCurrentLimit(true);
 
-		boxLiftMotor.configContinuousCurrentLimit(100, 500);
+		boxLiftLeftMotor.configContinuousCurrentLimit(100, 500);
+		boxLiftRightMotor.configContinuousCurrentLimit(100, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(2, 500);
 
 		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
@@ -145,7 +149,9 @@ public class Robot extends IterativeRobot {
 		//autonomousPathfinding(gameData, switches.getSwitches());
 		
 		//TEST CODE
-		DriveY(-.5, 10);
+		DriveY(-.5, 3);
+		DriveX(.5, 4);
+		DriveY(-.5, 5);
 	}
 
 	/** Go to the scale */
@@ -296,11 +302,19 @@ public class Robot extends IterativeRobot {
 		if (goUp) boxLiftEncoder.setReverseDirection(false);
 
 		if (goUp)
-			if (boxLiftEncoder.get() < Config.EncoderTopValue) boxLiftMotor.set(ControlMode.PercentOutput, 1);
+			if (boxLiftEncoder.get() < Config.EncoderTopValue) {
+				boxLiftLeftMotor.set(ControlMode.PercentOutput, 1);
+				boxLiftRightMotor.set(ControlMode.PercentOutput, 1);
+			}
 		else if (goDown)
-			if (boxLiftEncoder.get() < 10) boxLiftMotor.set(ControlMode.PercentOutput, -1);
-		else
-			boxLiftMotor.set(ControlMode.PercentOutput, 0);
+			if (boxLiftEncoder.get() < 10) {
+				boxLiftLeftMotor.set(ControlMode.PercentOutput, -1);
+				boxLiftRightMotor.set(ControlMode.PercentOutput, -1);
+			}
+		else {
+			boxLiftLeftMotor.set(ControlMode.PercentOutput, 0);
+			boxLiftRightMotor.set(ControlMode.PercentOutput, 0);
+		}
 		
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -1);
