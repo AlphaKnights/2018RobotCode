@@ -141,11 +141,11 @@ public class Robot extends IterativeRobot {
 		DriveY(.5, 5);
 	}
 
-	/** Go to the scale */
+	/** Tells the robot to go to the scale */
 	boolean scalePriority = false;
-	/** Go to the switch */
+	/** Tells the robot to go to the switch */
 	boolean switchPriority = false;
-	/** Cross the line */
+	/** Tells the robot to go straight, middle, and stop */
 	boolean autonomousStraight = false;
 
 	public void autonomousPathfinding(String gameData, boolean[] input) {
@@ -158,7 +158,6 @@ public class Robot extends IterativeRobot {
 		// 6 - delay 2s
 		// 7 - delay 5s
 
-		// TODO: break on autonomous end
 		if (input[0]) {
 			fieldPosition = Position.Left;
 		} else if (input[1]) {
@@ -171,7 +170,7 @@ public class Robot extends IterativeRobot {
 
 		if (input[3]) {
 			autonomousStraight = true;
-			System.out.println("Go straight");
+			System.out.println("Target straight");
 		} else if (input[4]) {
 			scalePriority = true;
 			System.out.println("Target scale");
@@ -192,12 +191,11 @@ public class Robot extends IterativeRobot {
 			Thread.currentThread().interrupt();
 		}
 
-		// TODO: Verify the logic of gameData and if switchPriority or scalePriority
-		// interferes with it
 		if (fieldPosition == Position.Left) {
 
 			if (autonomousStraight) {
-				System.out.println("Go straight"); // Put left auto code here for straight
+				System.out.println("Go straight, middle, and stop");
+				// Put left auto code here for straight
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
 					// Put left auto code here with scale priority
@@ -210,7 +208,7 @@ public class Robot extends IterativeRobot {
 				if (gameData.charAt(0) == 'L') {
 					// Put left auto code here with switch priority
 				} else if (gameData.charAt(0) == 'R') {
-					DriveX(.5, 10);
+					DriveX(.5, 10); 
 					// Put left auto code here for straight
 				} else {
 					System.err.println("Couldn't determine gameData.charAt(0)");
@@ -220,7 +218,6 @@ public class Robot extends IterativeRobot {
 		} else if (fieldPosition == Position.Middle) {
 
 			//TODO: Grabber and Slide
-			
 			if (gameData.charAt(0) == 'L') {
 				DriveY(.5, 4);
 				DriveReset(0.1);
@@ -240,7 +237,7 @@ public class Robot extends IterativeRobot {
 		} else if (fieldPosition == Position.Right) {
 
 			if (autonomousStraight) {
-				System.out.println("Go straight"); // Go straight, through the middle, and stop
+				System.out.println("Go straight"); // Go straight, middle, and stop
 			} else if (scalePriority) {
 				if (gameData.charAt(1) == 'L') {
 					// Put autonomous straight code here
