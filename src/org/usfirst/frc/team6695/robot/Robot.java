@@ -13,9 +13,12 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDSourceType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.drive.Vector2d;
+import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
@@ -98,10 +101,6 @@ public class Robot extends IterativeRobot {
 		boxLiftRightMotor.configContinuousCurrentLimit(100, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(2, 500);
 
-		// Might need to be put teliop init i think...
-		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
-		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
-
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		joystick = new Joystick(Config.JoystickChannel);
 		xbox = new XboxController(Config.XBoxChannel);
@@ -118,16 +117,11 @@ public class Robot extends IterativeRobot {
 		DTFLPID = new PIDController(Kp, Ki, Kd, DTEncFL, frontLeft);
 		DTRRPID = new PIDController(Kp, Ki, Kd, DTEncRL, rearLeft);
 		DTRLPID = new PIDController(Kp, Ki, Kd, DTEncRR, rearRight);
-
-		DTFRPID.enable();
-		DTFLPID.enable();
-		DTRRPID.enable();
-		DTRLPID.enable();
-
-		SmartDashboard.putData("Front Right Wheel Speed PID", DTFRPID);
-		SmartDashboard.putData("Front Left Wheel Speed PID", DTFLPID);
-		SmartDashboard.putData("Rear Right Wheel Speed PID", DTRRPID);
-		SmartDashboard.putData("Rear Left Wheel Speed PID", DTFRPID);
+		
+//		SmartDashboard.putData("Front Right Wheel Speed PID", DTFRPID);
+//		SmartDashboard.putData("Front Left Wheel Speed PID", DTFLPID);
+//		SmartDashboard.putData("Rear Right Wheel Speed PID", DTRRPID);
+//		SmartDashboard.putData("Rear Left Wheel Speed PID", DTFRPID);
 
 		autotime = new Timer();
 
@@ -143,12 +137,18 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void teleopInit() {
+		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
+		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
+		DTFRPID.disable();
+		DTFLPID.disable();
+		DTRRPID.disable();
+		DTRLPID.disable();
 		teleOpCalled = true;
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
+		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
 				joystick.getTrigger());
 		boxLift(xbox.getYButton(), xbox.getAButton(), xbox.getBButton(), xbox.getXButton());
 		// System.out.println(c.get());
@@ -156,7 +156,26 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void autonomousInit() {
+		frontLeft.setSafetyEnabled(false);
+		frontRight.setSafetyEnabled(false);
+		rearLeft.setSafetyEnabled(false);
+		rearRight.setSafetyEnabled(false);
 
+		DTFRPID.enable();
+		DTFLPID.enable();
+		DTRRPID.enable();
+		DTRLPID.enable();
+		
+		DTEncFL.setPIDSourceType(PIDSourceType.kRate);
+		DTEncFL.setPIDSourceType(PIDSourceType.kRate);
+		DTEncFL.setPIDSourceType(PIDSourceType.kRate);
+		DTEncFL.setPIDSourceType(PIDSourceType.kRate);
+		
+		DTFRPID.setPercentTolerance(10);
+		DTFLPID.setPercentTolerance(10);
+		DTRLPID.setPercentTolerance(10);
+		DTRRPID.setPercentTolerance(10);
+		
 		autotime.reset();
 		autotime.start();
 
@@ -164,9 +183,11 @@ public class Robot extends IterativeRobot {
 		// autonomousPathfinding(gameData, switches.getSwitches());
 
 		// TEST CODE
-		DriveY(-.5, 3);
-		DriveX(.5, 4);
-		DriveY(-.5, 5);
+		// DriveY(.5, 3);
+		// DriveX(.5, 4);
+		// DriveY(.5, 5);
+		
+		DriveX(.5, 10);
 	}
 
 	/** Go to the scale */
@@ -370,13 +391,28 @@ public class Robot extends IterativeRobot {
 		DTEncFR.reset();
 		DTEncRL.reset();
 		DTEncRR.reset();
-
+		
+		DTFLPID.setF(speed);
+		DTFRPID.setF(speed);
+		DTRLPID.setF(speed);
+		DTRRPID.setF(speed);
+		
 		while (Math.abs(DTEncFL.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
-			driveTrain.driveLinearX(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
+			driveLinearX(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
+
+			System.out.println("DTEncFL: " + DTEncFL.get());
+			System.out.println("DTEncFR: " + DTEncFR.get());
+			System.out.println("DTEncRL: " + DTEncRL.get());
+			System.out.println("DTEncRR: " + DTEncRR.get());
 		}
+		
+		DTFLPID.setF(0);
+		DTFRPID.setF(0);
+		DTRLPID.setF(0);
+		DTRRPID.setF(0);
 	}
 
 	public void DriveY(double speed, double feet) {
@@ -389,7 +425,7 @@ public class Robot extends IterativeRobot {
 				&& Math.abs(DTEncFR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRR.get()) < Math.abs(feet * Config.encUnit)
 				&& Math.abs(DTEncRL.get()) < Math.abs(feet * Config.encUnit) && !teleOpCalled && autotime.get() < 15) {
-			driveTrain.driveLinearY(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
+			driveLinearY(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
 		}
 	}
 
@@ -404,7 +440,83 @@ public class Robot extends IterativeRobot {
 				&& Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit)
 				&& Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) && !teleOpCalled
 				&& autotime.get() < 15) {
-			driveTrain.driveRotational(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
+			driveRotational(speed, DTFLPID, DTFRPID, DTRLPID, DTRRPID);
+		}
+	}
+
+	public void driveLinearY(double speed, PIDController frontLeftPID, PIDController frontRightPID,
+			PIDController rearLeftPID, PIDController rearRightPID) {
+		Vector2d input = new Vector2d(0.0, speed);
+		input.rotate(-90);
+
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = -speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = speed;
+		wheelSpeeds[MotorType.kRearRight.value] = -speed;
+
+		normalize(wheelSpeeds);
+		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value]);
+		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value]);
+		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value]);
+		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value]);
+		// frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		// frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		// rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		// rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+	}
+
+	public void driveLinearX(double speed, PIDController frontLeftPID, PIDController frontRightPID,
+			PIDController rearLeftPID, PIDController rearRightPID) {
+
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = -speed;
+		wheelSpeeds[MotorType.kRearRight.value] = -speed;
+
+		normalize(wheelSpeeds);
+		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value]);
+		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value]);
+		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value]);
+		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value]);
+		// frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		// frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		// rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		// rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+	}
+
+	public void driveRotational(double speed, PIDController frontLeftPID, PIDController frontRightPID,
+			PIDController rearLeftPID, PIDController rearRightPID) {
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = speed;
+		wheelSpeeds[MotorType.kRearRight.value] = speed;
+
+		normalize(wheelSpeeds);
+		frontLeftPID.setSetpoint(wheelSpeeds[MotorType.kFrontLeft.value]);
+		frontRightPID.setSetpoint(wheelSpeeds[MotorType.kFrontRight.value]);
+		rearLeftPID.setSetpoint(wheelSpeeds[MotorType.kRearLeft.value]);
+		rearRightPID.setSetpoint(wheelSpeeds[MotorType.kRearRight.value]);
+		// frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value] * m_maxOutput);
+		// frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value] * m_maxOutput);
+		// rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value] * m_maxOutput);
+		// rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value] * m_maxOutput);
+	}
+
+	protected void normalize(double[] wheelSpeeds) {
+		double maxMagnitude = Math.abs(wheelSpeeds[0]);
+		for (int i = 1; i < wheelSpeeds.length; i++) {
+			double temp = Math.abs(wheelSpeeds[i]);
+			if (maxMagnitude < temp) {
+				maxMagnitude = temp;
+			}
+		}
+		if (maxMagnitude > 1.0) {
+			for (int i = 0; i < wheelSpeeds.length; i++) {
+				wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
+			}
 		}
 	}
 }
