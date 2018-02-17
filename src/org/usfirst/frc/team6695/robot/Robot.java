@@ -6,10 +6,12 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
@@ -80,6 +82,8 @@ public class Robot extends IterativeRobot {
 
 	/** Switch Data **/
 	ModeSelector switches;
+	/** Gyroscope **/
+	ADXRS450_Gyro gyroscope;
 	/** Position Data **/
 	Position fieldPosition;
 	/** Autonomous Time Elapsed **/
@@ -149,7 +153,6 @@ public class Robot extends IterativeRobot {
 		liftSpinMotor.configContinuousCurrentLimit(24, 500);
 
 		boxLiftEncoder = new Counter(Config.LiftEncoderPort);
-
 		ultra1 = new Ultrasonic(8, 9);
 
 		/** Forklift Subsystem Setup **/
@@ -158,6 +161,9 @@ public class Robot extends IterativeRobot {
 		/** Autonomous Subsystem Setup **/
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		autotime = new Timer();
+		
+		gyroscope = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
+		gyroscope.calibrate();
 
 		/** Dashboard Tasks **/
 		tableSetup();
@@ -201,6 +207,8 @@ public class Robot extends IterativeRobot {
 
 		/** Update Deadzone **/
 		updateFromDashboard(joystick.getRawButton(11));
+		
+		System.out.println("Gyro Angle: " + gyroscope.getAngle());
 	}
 
 	/**
@@ -543,17 +551,17 @@ public class Robot extends IterativeRobot {
 		Timer driveTimer = new Timer();
 		driveTimer.reset();
 		driveTimer.start();
-
-		while (Math.abs(DTEncFL.get()) < Math.abs(degrees * Config.degUnit)
-				&& Math.abs(DTEncFR.get()) < Math.abs(degrees * Config.degUnit)
-				&& Math.abs(DTEncRR.get()) < Math.abs(degrees * Config.degUnit)
-				&& Math.abs(DTEncRL.get()) < Math.abs(degrees * Config.degUnit) && !teleOpCalled
-				&& autotime.get() < 15) {
-
-			if (driveTimer.get() < 0.15) {
-				driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
-			} else {
-				driveRotational(speed);
+		
+		double initialDegrees = gyroscope.getAngle();
+		if (degrees < 0) {
+			while (gyroscope.getAngle() > (initialDegrees + degrees) && !teleOpCalled && autotime.get() < 15) {
+				if (driveTimer.get() < 0.15) driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
+				else driveRotational(speed);
+			}
+		} else {
+			while (gyroscope.getAngle() < (initialDegrees + degrees) && !teleOpCalled && autotime.get() < 15) {
+				if (driveTimer.get() < 0.15) driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
+				else driveRotational(speed);
 			}
 		}
 
