@@ -16,46 +16,84 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 
 public class Robot extends IterativeRobot {
-
-	public AlphaMDrive driveTrain;
+/** Controllers **/
+	/** Joystick **/
 	Joystick joystick;
+	/** Xbox Controller **/
 	XboxController xbox;
 
+/** Power Cube Subsystem **/
+	/** Linear Slide Motor **/
 	TalonSRX boxLiftMotor;
+	/** Grabber Motor **/
 	TalonSRX closingBoxLiftMotor;
+	/** Snowmobile Spin Motor **/
 	TalonSRX liftSpinMotor;
+	
+	/** Linear Slide Encoder **/
+	Counter boxLiftEncoder;
+	
+	/** Linear Slide Displacement Sensor **/
+	Ultrasonic ultra1;
 
+/** Forklift Subsystem **/
+	/** Forklift Motor **/
 	TalonSRX forkLiftMotor;
 
-	ModeSelector switches;
-	Position fieldPosition;
-
-	Counter boxLiftEncoder;
-
+/** Drivetrain Subsystem **/
+	/** Drivetrain **/
+	AlphaMDrive driveTrain;
+	
+	/** Front Right Drivetrain Motor **/
+	TalonSRX frontRight;
+	/** Front Left Drivetrain Motor **/
+	TalonSRX frontLeft;
+	/** Rear Left Drivetrain Motor **/
+	TalonSRX rearLeft;
+	/** Rear Right Drivetrain Motor **/
+	TalonSRX rearRight;
+	
+	/** Front Right Drivetrain Encoder **/
 	Counter DTEncFR;
+	/** Front Left Drivetrain Encoder **/
 	Counter DTEncFL;
+	/** Rear Left Drivetrain Encoder **/
 	Counter DTEncRL;
+	/** Rear Right Drivetrain Encoder **/
 	Counter DTEncRR;
-
-	Timer autotime;
-
+	
+	/** Controller Deadzone (Configurable in Dashboard) **/
+	NetworkTableEntry DeadBandEntry;
+	
+/** Autonomous Subsystem **/
+	/** Possible Positions**/
 	public enum Position {
 		Left,
 		Middle,
 		Right;
 	}
-
-	TalonSRX frontLeft;
-	TalonSRX rearLeft;
-	TalonSRX frontRight;
-	TalonSRX rearRight;
-
-	Ultrasonic ultra1;
 	
-	NetworkTableEntry DeadBandEntry;
+	/** Switch Data **/
+	ModeSelector switches;
+	/** Position Data **/
+	Position fieldPosition;
+	/** Autonomous Time Elapsed **/
+	Timer autotime;
+	
+	/** Autonomous Finished **/
+	boolean teleOpCalled;
+	/** Scale Priority **/
+	boolean scalePriority = false;
+	/** Switch Priority **/
+	boolean switchPriority = false;
+	/** Autoline Priority **/
+	boolean autonomousStraight = false;
 
-	public int liftEncoderDistance;
-
+/**----------------------------------------**/
+	
+	/**
+	 * Setup configurable controller deadzone
+	 */
 	public void tableSetup() {
 		NetworkTableInstance nts = NetworkTableInstance.getDefault();
 		NetworkTable table = nts.getTable("SmartDashboard");
@@ -63,22 +101,37 @@ public class Robot extends IterativeRobot {
 		DeadBandEntry.setDouble(.1);
 	}
 
+	/**
+	 * Robot-wide initialization code is here.
+	 *
+	 * <p>Users should override this method for default Robot-wide initialization which will be called
+	 * when the robot is first powered on. It will be called exactly one time.
+	 *
+	 * <p>Warning: the Driver Station "Robot Code" light and FMS "Robot Ready" indicators will be off
+	 * until RobotInit() exits. Code in RobotInit() that waits for enable will cause the robot to
+	 * never indicate that the code is ready, causing the robot to be bypassed in a match.
+	 */
 	@Override
 	public void robotInit() {
-		tableSetup();
+	/** Controller Setup **/
+		joystick = new Joystick(Config.JoystickChannel);
+		xbox = new XboxController(Config.XBoxChannel);
 
-		CameraServer.getInstance().startAutomaticCapture();
-
+	/** Drivetrain Subsystem Setup **/
 		frontLeft = new TalonSRX(Config.DriveTrainFrontLeft);
 		rearLeft = new TalonSRX(Config.DriveTrainRearLeft);
 		frontRight = new TalonSRX(Config.DriveTrainFrontRight);
 		rearRight = new TalonSRX(Config.DriveTrainRearRight);
+		
+		DTEncFR = new Counter(Config.DrivetrainEncoderFrontRight);
+		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
+		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
+		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
 
+	/** Power Cube Subsystem Setup **/
 		boxLiftMotor = new TalonSRX(Config.LiftMotor);
 		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
 		liftSpinMotor = new TalonSRX(Config.LiftSpinMotor);
-
-		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
 
 		boxLiftMotor.enableCurrentLimit(true);
 		closingBoxLiftMotor.enableCurrentLimit(true);
@@ -87,59 +140,79 @@ public class Robot extends IterativeRobot {
 		boxLiftMotor.configContinuousCurrentLimit(10, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(10, 500);
 		liftSpinMotor.configContinuousCurrentLimit(24, 500);
-
-		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
-		joystick = new Joystick(Config.JoystickChannel);
-		xbox = new XboxController(Config.XBoxChannel);
-
+		
 		boxLiftEncoder = new Counter(Config.LiftEncoderPort);
-
-		DTEncFR = new Counter(Config.DrivetrainEncoderFrontRight);
-		DTEncFL = new Counter(Config.DrivetrainEncoderFrontLeft);
-		DTEncRR = new Counter(Config.DrivetrainEncoderRearRight);
-		DTEncRL = new Counter(Config.DrivetrainEncoderRearLeft);
-
-		autotime = new Timer();
-
+		
 		ultra1 = new Ultrasonic(8,9);
 		
-		liftEncoderDistance = 0;
+	/** Forklift Subsystem Setup **/
+		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
+
+	/** Autonomous Subsystem Setup **/
+		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
+		autotime = new Timer();
+		
+	/** Dashboard Tasks **/
+		tableSetup();
+		CameraServer.getInstance().startAutomaticCapture();
 	}
 
-	boolean teleOpCalled = false;
-
+	/**
+	 * Initialization code for teleop mode is here.
+	 *
+	 * <p>Users should override this method for initialization code which will be called each time the
+	 * robot enters teleop mode.
+	 */
 	@Override
 	public void teleopInit() {
-		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
-		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
-
+		/** Force End Autonomous**/
 		teleOpCalled = true;
-
-		liftEncoderDistance = 0;
+		
+		/** Setup Drivetrain **/
+		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
+		
+		/** Setup Deadzone **/
+		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 	}
 
+	/**
+	 * Periodic code for teleop mode is here.
+	 */
 	@Override
 	public void teleopPeriodic() {
+		/** Joystick-Controlled Driving **/
 		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
 				joystick.getTrigger());
 		
-		boxLift(xbox.getYButton(), xbox.getAButton(), xbox.getBButton(), xbox.getXButton());
-		boxLiftSpin(xbox.getStartButton(), xbox.getBackButton());
-		System.out.println("Current: " + liftSpinMotor.getOutputCurrent());
+		/** Xbox-Controlled Linear Sliding **/
+		boxLift(xbox.getYButton(), xbox.getAButton());
+		/** Xbox-Controlled Power Cube Grabbing **/
+		boxGrab(xbox.getBButton(), xbox.getXButton());
+		/** Xbox-Controlled Lift Spinning **/
+		boxSpin(xbox.getStartButton(), xbox.getBackButton());
 		
+		/** Update Deadzone **/
 		updateFromDashboard(joystick.getRawButton(11));
 	}	
 	
+	/**
+	 * Initialization code for autonomous mode is here.
+	 *
+	 * <p>Users should override this method for initialization code which will be called each time the
+	 * robot enters autonomous mode.
+	 */
 	@Override
 	public void autonomousInit() {
+		/** Autonomous Start **/
 		teleOpCalled = false;
-		
-		liftEncoderDistance = 0;
 
+		/** Start Autonomous Time-Elapsed **/
 		autotime.reset();
 		autotime.start();
 
+		/** Switch and Scale Alliance Positions **/
 		// String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		/** Execute Desired Autonomous Pathway **/
 		// autonomousPathfinding(gameData, switches.getSwitches());
 
 		// TEST CODE
@@ -150,13 +223,9 @@ public class Robot extends IterativeRobot {
 		DriveY(.5, 5);
 	}
 
-	/** Tells the robot to go to the scale */
-	boolean scalePriority = false;
-	/** Tells the robot to go to the switch */
-	boolean switchPriority = false;
-	/** Tells the robot to go straight, middle, and stop */
-	boolean autonomousStraight = false;
-
+	/**
+	 * Pathfinding code for autonomous mode is here.
+	 */
 	public void autonomousPathfinding(String gameData, boolean[] input) {
 		// 0 - left
 		// 1 - middle
@@ -271,78 +340,89 @@ public class Robot extends IterativeRobot {
 
 		// TODO: It doesn't help us to do nothing when the switches are set incorrectly
 		// so do the bare minimum in case of human error by the driveteam (go straight)
-
-		// 5-4-5 feet to cross base line in middle positions
-		// 7 feet to go straight
 	}
 
-	int previousBoxLiftEncoderValue;
-
 	/**
-	 * This is the box Lift Code
+	 * This is the Power Cube Lift code
 	 * 
 	 * @param goUp
-	 *            Button to go up. Boolean Value
+	 *            Button to raise the linear slide
 	 * @param goDown
-	 *            Button to go down. Boolean Value
-	 * @param close
-	 *            Button to close the Thing. Boolean Value
-	 * @param open
-	 *            Button to open the thing. Boolean Value
+	 *            Button to lower the linear slide
 	 */
-	public void boxLift(boolean goUp, boolean goDown, boolean close, boolean open) {
-		int deltaBoxLiftEncoderValue = Math.abs(boxLiftEncoder.get() - previousBoxLiftEncoderValue);
-
-		if (goDown) liftEncoderDistance = liftEncoderDistance - deltaBoxLiftEncoderValue;
-		else if (goUp) liftEncoderDistance = liftEncoderDistance + deltaBoxLiftEncoderValue;
-		else liftEncoderDistance = liftEncoderDistance - deltaBoxLiftEncoderValue;
-
-		if (goUp) {
-			boxLiftMotor.set(ControlMode.PercentOutput, 1);
-		} else if (goDown) {
-			boxLiftMotor.set(ControlMode.PercentOutput, -.5);
-		} else {
-			boxLiftMotor.set(ControlMode.PercentOutput, 0);
-		}
-
+	public void boxLift(boolean goUp, boolean goDown) {
+		if (goUp) boxLiftMotor.set(ControlMode.PercentOutput, 1);
+		else if (goDown) boxLiftMotor.set(ControlMode.PercentOutput, -.5);
+		else boxLiftMotor.set(ControlMode.PercentOutput, 0);
+	}
+	
+	/**
+	 * This is the Power Cube Grab code
+	 * 
+	 * @param close
+	 *            Button to close the grabber
+	 * @param open
+	 *            Button to open the grabber
+	 */
+	public void boxGrab(boolean close, boolean open) {
 		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, .5);
 		else if (close) closingBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
-
-		previousBoxLiftEncoderValue = boxLiftEncoder.get();
 	}
 	
-	public void boxLiftSpin(boolean wind, boolean unwind) {
-		if (wind) {
-			liftSpinMotor.set(ControlMode.PercentOutput, 0.2);
-		} else if (unwind) {
-			liftSpinMotor.set(ControlMode.PercentOutput, -1);
-		} else {
-			liftSpinMotor.set(ControlMode.PercentOutput, 0);
-		}
+	/**
+	 * This is the Power Cube Spin code
+	 * 
+	 * @param wind
+	 *            Button to wind the grabber
+	 * @param unwind
+	 *            Button to unwind the grabber
+	 */
+	public void boxSpin(boolean wind, boolean unwind) {
+		if (wind) liftSpinMotor.set(ControlMode.PercentOutput, 0.2);
+		else if (unwind) liftSpinMotor.set(ControlMode.PercentOutput, -1);
+		else liftSpinMotor.set(ControlMode.PercentOutput, 0);
 	}
 
+	/**
+	 * This is the Forklift code
+	 * 
+	 * @param goUp
+	 *            Button to raise the forklift
+	 * @param goDown
+	 *            Button to lower the forklift
+	 */
 	public void robotForkLift(boolean goUp, boolean goDown) {
 		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
 		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 
-	public void updateFromDashboard(boolean update) { // TODO
+	//TODO: Test & Document updateFromDashboard()
+	public void updateFromDashboard(boolean update) {
 		if (!update) return;
 		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 	}
-
+	
+	/**
+	 * Initialization code for test mode is here.
+	 *
+	 * <p>Users should override this method for initialization code which will be called each time the
+	 * robot enters test mode.
+	 */
 	@Override
 	public void testInit() {
 		DTEncFL.reset();
 		DTEncFR.reset();
 		DTEncRL.reset();
 		DTEncRR.reset();
+		
 		ultra1.setAutomaticMode(true);
-
 	}
 
+	/**
+	 * Periodic code for test mode is here.
+	 */
 	@Override
 	public void testPeriodic() {
 //		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
@@ -355,10 +435,17 @@ public class Robot extends IterativeRobot {
 //			System.out.print(c + " ");
 //		}
 //		System.out.println();
-		System.out.println(ultra1.getRangeInches());  
-		
+		System.out.println(ultra1.getRangeInches());  	
 	}
 
+	/**
+	 * This is the autonomous x-axis driving code
+	 * 
+	 * @param speed
+	 *            Percent output for all motors where negative is the opposite direction of motion 
+	 * @param feet
+	 *            The number of feet to travel in the given direction (floating-point value)
+	 */
 	public void DriveX(double speed, double feet) {
 		DTEncFL.reset();
 		DTEncFR.reset();
@@ -387,9 +474,16 @@ public class Robot extends IterativeRobot {
 
 		driveTimer.stop();
 		driveTimer.reset();
-
 	}
 
+	/**
+	 * This is the autonomous y-axis driving code
+	 * 
+	 * @param speed
+	 *            Percent output for all motors where negative is the opposite direction of motion 
+	 * @param feet
+	 *            The number of feet to travel in the given direction (floating-point value)
+	 */
 	public void DriveY(double speed, double feet) {
 		DTEncFL.reset();
 		DTEncFR.reset();
@@ -420,6 +514,14 @@ public class Robot extends IterativeRobot {
 		driveTimer.reset();
 	}
 
+	/**
+	 * This is the autonomous rotational driving code
+	 * 
+	 * @param speed
+	 *            Percent output for all motors where negative is the opposite direction of motion 
+	 * @param degrees
+	 *            The number of degrees to spin in the given direction (floating-point value)
+	 */
 	public void DriveRotational(double speed, double degrees) {
 		DTEncFL.reset();
 		DTEncFR.reset();
@@ -449,6 +551,12 @@ public class Robot extends IterativeRobot {
 		driveTimer.reset();
 	}
 	
+	/**
+	 * This is the autonomous driving reset code (sets the motor output to 0)
+	 * 
+	 * @param time
+	 *            Number of seconds to let the robot cool off
+	 */
 	public void DriveReset(double time) {
 		Timer driveTimer = new Timer();
 		driveTimer.reset();
@@ -460,6 +568,34 @@ public class Robot extends IterativeRobot {
 		driveTimer.reset();
 	}
 
+	/**
+	 * This is the autonomous x-axis helper code
+	 * 
+	 * @param speed
+	 *            Percent output for all motors where negative is the opposite direction of motion
+	 */
+	public void driveLinearX(double speed) {
+		ControlMode cm = ControlMode.PercentOutput;
+
+		double[] wheelSpeeds = new double[4];
+		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
+		wheelSpeeds[MotorType.kFrontRight.value] = speed;
+		wheelSpeeds[MotorType.kRearLeft.value] = -speed;
+		wheelSpeeds[MotorType.kRearRight.value] = -speed;
+
+		normalize(wheelSpeeds);
+		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value]);
+		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value]);
+		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value]);
+		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value]);
+	}
+	
+	/**
+	 * This is the autonomous y-axis helper code
+	 * 
+	 * @param speed
+	 *            Percent output for all motors where negative is the opposite direction of motion
+	 */
 	public void driveLinearY(double speed) {
 		ControlMode cm = ControlMode.PercentOutput;
 
@@ -476,22 +612,12 @@ public class Robot extends IterativeRobot {
 		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value]);
 	}
 
-	public void driveLinearX(double speed) {
-		ControlMode cm = ControlMode.PercentOutput;
-
-		double[] wheelSpeeds = new double[4];
-		wheelSpeeds[MotorType.kFrontLeft.value] = speed;
-		wheelSpeeds[MotorType.kFrontRight.value] = speed;
-		wheelSpeeds[MotorType.kRearLeft.value] = -speed;
-		wheelSpeeds[MotorType.kRearRight.value] = -speed;
-
-		normalize(wheelSpeeds);
-		frontLeft.set(cm, wheelSpeeds[MotorType.kFrontLeft.value]);
-		frontRight.set(cm, wheelSpeeds[MotorType.kFrontRight.value]);
-		rearLeft.set(cm, wheelSpeeds[MotorType.kRearLeft.value]);
-		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value]);
-	}
-
+	/**
+	 * This is the autonomous rotational helper code
+	 * 
+	 * @param speed
+	 *            Percent output for all motors where negative is the opposite direction of motion
+	 */
 	public void driveRotational(double speed) {
 		ControlMode cm = ControlMode.PercentOutput;
 
@@ -508,6 +634,12 @@ public class Robot extends IterativeRobot {
 		rearRight.set(cm, wheelSpeeds[MotorType.kRearRight.value]);
 	}
 
+	/**
+	 * This is the wheel speed normalization code for maintaining direction at varying speeds
+	 * 
+	 * @param wheelSpeeds
+	 *            Set of motor output values for a given tick
+	 */
 	protected void normalize(double[] wheelSpeeds) {
 		double maxMagnitude = Math.abs(wheelSpeeds[0]);
 		for (int i = 1; i < wheelSpeeds.length; i++) {
