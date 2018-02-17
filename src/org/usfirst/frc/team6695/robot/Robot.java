@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 
@@ -22,6 +23,7 @@ public class Robot extends IterativeRobot {
 
 	TalonSRX boxLiftMotor;
 	TalonSRX closingBoxLiftMotor;
+	TalonSRX liftSpinMotor;
 
 	TalonSRX forkLiftMotor;
 
@@ -48,6 +50,8 @@ public class Robot extends IterativeRobot {
 	TalonSRX frontRight;
 	TalonSRX rearRight;
 
+	Ultrasonic ultra1;
+	
 	NetworkTableEntry DeadBandEntry;
 
 	public int liftEncoderDistance;
@@ -72,14 +76,17 @@ public class Robot extends IterativeRobot {
 
 		boxLiftMotor = new TalonSRX(Config.LiftMotor);
 		closingBoxLiftMotor = new TalonSRX(Config.liftGrabberMotor);
+		liftSpinMotor = new TalonSRX(Config.LiftSpinMotor);
 
 		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
 
 		boxLiftMotor.enableCurrentLimit(true);
 		closingBoxLiftMotor.enableCurrentLimit(true);
+		liftSpinMotor.enableCurrentLimit(true);
 
 		boxLiftMotor.configContinuousCurrentLimit(10, 500);
-		closingBoxLiftMotor.configContinuousCurrentLimit(1, 500);
+		closingBoxLiftMotor.configContinuousCurrentLimit(10, 500);
+		liftSpinMotor.configContinuousCurrentLimit(24, 500);
 
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		joystick = new Joystick(Config.JoystickChannel);
@@ -94,8 +101,9 @@ public class Robot extends IterativeRobot {
 
 		autotime = new Timer();
 
+		ultra1 = new Ultrasonic(8,9);
+		
 		liftEncoderDistance = 0;
-
 	}
 
 	boolean teleOpCalled = false;
@@ -114,13 +122,14 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
 				joystick.getTrigger());
-		if (xbox.getBackButton()) liftEncoderDistance = 0;
+		
 		boxLift(xbox.getYButton(), xbox.getAButton(), xbox.getBButton(), xbox.getXButton());
+		boxLiftSpin(xbox.getStartButton(), xbox.getBackButton());
+		System.out.println("Current: " + liftSpinMotor.getOutputCurrent());
+		
 		updateFromDashboard(joystick.getRawButton(11));
-		System.out.println("FL: " + frontLeft.getOutputCurrent() + " FR: " + frontRight.getOutputCurrent() + " RL: "
-				+ rearLeft.getOutputCurrent() + " RR: " + rearRight.getOutputCurrent());
-	}
-
+	}	
+	
 	@Override
 	public void autonomousInit() {
 		teleOpCalled = false;
@@ -305,6 +314,16 @@ public class Robot extends IterativeRobot {
 
 		previousBoxLiftEncoderValue = boxLiftEncoder.get();
 	}
+	
+	public void boxLiftSpin(boolean wind, boolean unwind) {
+		if (wind) {
+			liftSpinMotor.set(ControlMode.PercentOutput, 0.2);
+		} else if (unwind) {
+			liftSpinMotor.set(ControlMode.PercentOutput, -1);
+		} else {
+			liftSpinMotor.set(ControlMode.PercentOutput, 0);
+		}
+	}
 
 	public void robotForkLift(boolean goUp, boolean goDown) {
 		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
@@ -323,20 +342,24 @@ public class Robot extends IterativeRobot {
 		DTEncFR.reset();
 		DTEncRL.reset();
 		DTEncRR.reset();
+		ultra1.setAutomaticMode(true);
+
 	}
 
 	@Override
 	public void testPeriodic() {
-		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
-				joystick.getTrigger());
-
-		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: "
-				+ DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
-		System.out.println();
-		for (boolean c : switches.getSwitches()) {
-			System.out.print(c + " ");
-		}
-		System.out.println();
+//		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90, joystick.getThrottle(),
+//				joystick.getTrigger());
+//
+//		System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ", REARLEFT: "
+//				+ DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
+//		System.out.println();
+//		for (boolean c : switches.getSwitches()) {
+//			System.out.print(c + " ");
+//		}
+//		System.out.println();
+		System.out.println(ultra1.getRangeInches());  
+		
 	}
 
 	public void DriveX(double speed, double feet) {

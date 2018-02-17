@@ -8,6 +8,7 @@ public final class Config {
 	static final int DriveTrainFrontRight = 4;
 	static final int DriveTrainRearRight = 3;
 	static final int LiftMotor = 5;
+	static final int LiftSpinMotor = 8;
 	static final int liftGrabberMotor = 7;
 	static final int ForkLiftMotor = 9;
 
