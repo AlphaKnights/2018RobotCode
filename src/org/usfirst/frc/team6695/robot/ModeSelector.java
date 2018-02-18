@@ -57,4 +57,14 @@ public class ModeSelector {
 		return switchMode;
 	}
 
+	public boolean hasError() { // TODO Make Has Error Code and test it
+		// test for bottem row errors
+		if ((switch1.get() && switch2.get()) || (switch2.get() && switch3.get()) || (switch1.get() && switch3.get()))
+			return true;
+		// test for second row errors
+		if ((switch4.get() && switch5.get()) || (switch5.get() && switch6.get()) || (switch4.get() && switch6.get()))
+			return true;
+		return false;
+	}
+
 }

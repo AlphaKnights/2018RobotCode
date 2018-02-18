@@ -7,6 +7,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.AnalogOutput;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -99,12 +100,17 @@ public class Robot extends IterativeRobot {
 
 	/** Autonomous Finished **/
 	boolean teleOpCalled;
+	/** Autonomous Started **/
+	boolean autoInitCalled = false;
 	/** Scale Priority **/
 	boolean scalePriority = false;
 	/** Switch Priority **/
 	boolean switchPriority = false;
 	/** Autoline Priority **/
 	boolean autonomousStraight = false;
+
+	/* Robot Indicator Lights */
+	AnalogOutput warningLED1;
 
 	/* ---------------------------------------- */
 
@@ -171,6 +177,7 @@ public class Robot extends IterativeRobot {
 		/** Autonomous Subsystem Setup **/
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		autotime = new Timer();
+		warningLED1 = new AnalogOutput(0);
 
 		gyroscope = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 		gyroscope.calibrate();
@@ -178,6 +185,14 @@ public class Robot extends IterativeRobot {
 		/** Dashboard Tasks **/
 		tableSetup();
 		CameraServer.getInstance().startAutomaticCapture();
+	}
+
+	@Override
+	public void robotPeriodic() {
+		if (!autoInitCalled) {
+			if (switches.hasError()) warningLED1.setVoltage(1);
+			else warningLED1.setVoltage(0);
+		}
 	}
 
 	/**
@@ -237,6 +252,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 		/** Autonomous Start **/
 		teleOpCalled = false;
+		autoInitCalled = true;
 
 		/** Start Autonomous Time-Elapsed **/
 		autotime.reset();
