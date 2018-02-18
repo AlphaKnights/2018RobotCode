@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 	/* Controllers */
@@ -111,7 +112,11 @@ public class Robot extends IterativeRobot {
 
 	/* Robot Indicator Lights */
 	AnalogOutput warningLED1;
-
+	
+	/* SmartDashboard  User Inputs*/
+	double sliderLimitHeight = 30;
+	
+	
 	/* ---------------------------------------- */
 
 	/**
@@ -239,6 +244,15 @@ public class Robot extends IterativeRobot {
 		updateFromDashboard(joystick.getRawButton(11));
 
 		System.out.println("Gyro Angle: " + gyroscope.getAngle());
+		
+		SmartDashboard.putNumber("Slider Height in. ", ultra1.getRangeInches());
+		SmartDashboard.getNumber("Limit Height", sliderLimitHeight);
+		
+		if (ultra1.getRangeInches() > sliderLimitHeight) {
+			SmartDashboard.putBoolean("Max Slider Height ", false);
+		} else {
+			SmartDashboard.putBoolean("Max Slider Height ", true);
+		}
 	}
 
 	/**
