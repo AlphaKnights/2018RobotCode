@@ -9,9 +9,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Ultrasonic;
 import edu.wpi.first.wpilibj.XboxController;
@@ -89,6 +91,12 @@ public class Robot extends IterativeRobot {
 	/** Autonomous Time Elapsed **/
 	Timer autotime;
 
+	/* Servos */
+	/** Right Side Servo **/
+	Servo rightServo;
+	/** Left Side Servo **/
+	Servo leftServo;
+
 	/** Autonomous Finished **/
 	boolean teleOpCalled;
 	/** Scale Priority **/
@@ -157,11 +165,13 @@ public class Robot extends IterativeRobot {
 
 		/** Forklift Subsystem Setup **/
 		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
+		rightServo = new Servo(0);
+		leftServo = new Servo(1);
 
 		/** Autonomous Subsystem Setup **/
 		switches = new ModeSelector(10, 11, 12, 13, 14, 15, 16, 17);
 		autotime = new Timer();
-		
+
 		gyroscope = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 		gyroscope.calibrate();
 
@@ -205,9 +215,14 @@ public class Robot extends IterativeRobot {
 		/** Xbox-Controlled Lift Spinning **/
 		boxSpin(xbox.getStartButton(), xbox.getBackButton());
 
+		/** Joystick-Controlled Forklift **/
+		forklift(xbox.getBumper(Hand.kRight), xbox.getBumper(Hand.kLeft));
+		/** Joystick-Controlled Forklift Deploy **/
+		forkliftDeploy(joystick.getRawButton(2), joystick.getRawButton(9));
+
 		/** Update Deadzone **/
 		updateFromDashboard(joystick.getRawButton(11));
-		
+
 		System.out.println("Gyro Angle: " + gyroscope.getAngle());
 	}
 
@@ -227,6 +242,8 @@ public class Robot extends IterativeRobot {
 		autotime.reset();
 		autotime.start();
 
+		Timer temp = new Timer();
+
 		/** Switch and Scale Alliance Positions **/
 		// String gameData = DriverStation.getInstance().getGameSpecificMessage();
 		/** Execute Desired Autonomous Pathway **/
@@ -234,10 +251,33 @@ public class Robot extends IterativeRobot {
 
 		// TEST CODE
 		DriveY(.5, 4);
+
+		new Thread(() -> {
+			temp.reset();
+			temp.start();
+
+			while (temp.get() < 1 && !Thread.interrupted())
+				boxLift(true, false);
+			boxLift(false, false);
+
+			temp.stop();
+			temp.reset();
+		}).start();
+
 		DriveReset(0.1);
 		DriveX(.5, 7);
 		DriveReset(0.1);
 		DriveY(.5, 5);
+
+		temp.reset();
+		temp.start();
+
+		while (temp.get() < 0.5)
+			boxGrab(false, true);
+		boxGrab(false, false);
+
+		temp.stop();
+		temp.reset();
 	}
 
 	/**
@@ -409,10 +449,20 @@ public class Robot extends IterativeRobot {
 	 * @param goDown
 	 *            Button to lower the forklift
 	 */
-	public void robotForkLift(boolean goUp, boolean goDown) {
+	public void forklift(boolean goUp, boolean goDown) {
 		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
 		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
 		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
+	}
+
+	/**
+	 * This is the Forklift deploy code
+	 * 
+	 * @param deploy
+	 *            Button to deploy the forks
+	 */
+	public void forkliftDeploy(boolean deploy, boolean areYouSure) {
+		if (deploy && areYouSure) rightServo.set(0.5);
 	}
 
 	// TODO: Test & Document updateFromDashboard()
@@ -430,12 +480,19 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testInit() {
-		DTEncFL.reset();
-		DTEncFR.reset();
-		DTEncRL.reset();
-		DTEncRR.reset();
-
-		ultra1.setAutomaticMode(true);
+		// DTEncFL.reset();
+		// DTEncFR.reset();
+		// DTEncRL.reset();
+		// DTEncRR.reset();
+		//
+		// ultra1.setAutomaticMode(true);
+		leftServo.set(0);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		rightServo.set(0.5);
 	}
 
 	/**
@@ -455,7 +512,7 @@ public class Robot extends IterativeRobot {
 		// System.out.print(c + " ");
 		// }
 		// System.out.println();
-		System.out.println(ultra1.getRangeInches());
+		// System.out.println(ultra1.getRangeInches());
 	}
 
 	/**
@@ -551,7 +608,7 @@ public class Robot extends IterativeRobot {
 		Timer driveTimer = new Timer();
 		driveTimer.reset();
 		driveTimer.start();
-		
+
 		double initialDegrees = gyroscope.getAngle();
 		if (degrees < 0) {
 			while (gyroscope.getAngle() > (initialDegrees + degrees) && !teleOpCalled && autotime.get() < 15) {
