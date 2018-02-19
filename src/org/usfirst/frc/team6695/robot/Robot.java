@@ -7,14 +7,12 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
-import edu.wpi.first.wpilibj.AnalogOutput;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
-import edu.wpi.first.wpilibj.Relay.Direction;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
@@ -331,8 +329,8 @@ public class Robot extends IterativeRobot {
 		DriveX(.5, 6.25);
 		DriveReset(0.1);
 		DriveY(.5, 7);
-		DriveReset(0.1);
-		DriveToAngle(0);
+		DriveReset(1);
+		DriveToAngle(-0.5, 0);
 		DriveReset(1.5);
 
 		temp.reset();
@@ -536,7 +534,34 @@ public class Robot extends IterativeRobot {
 		if (!update) return;
 		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 	}
-
+	
+	public void DriveToAngle(double speed, double angle) {
+		double initialDegrees = gyroscope.getAngle();
+		
+		Timer driveTimer = new Timer();
+		driveTimer.reset();
+		driveTimer.start();
+		
+		if (speed < 0) {
+			while (gyroscope.getAngle() % 360 > angle && !teleOpCalled && autotime.get() < 15) {
+				if (driveTimer.get() < 0.15) driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
+				else driveRotational(speed);
+				
+				System.out.println("Gyro Normalized Angle (1): " + Math.abs(gyroscope.getAngle()) % 360);
+			}
+		} else {
+			while (gyroscope.getAngle() % 360 < angle && !teleOpCalled && autotime.get() < 15) {
+				if (driveTimer.get() < 0.15) driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
+				else driveRotational(speed);
+				
+				System.out.println("Gyro Normalized Angle (2): " + Math.abs(gyroscope.getAngle()) % 360);
+			}
+		}
+		
+		driveTimer.stop();
+		driveTimer.reset();
+	}
+	
 	/**
 	 * Initialization code for test mode is here.
 	 *
@@ -552,13 +577,8 @@ public class Robot extends IterativeRobot {
 		// DTEncRR.reset();
 		//
 		// ultra1.setAutomaticMode(true);
-		leftServo.set(0);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		rightServo.set(0.5);
+		
+		DriveToAngle(-0.5, 0);
 	}
 
 	/**
