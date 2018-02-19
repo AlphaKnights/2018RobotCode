@@ -14,6 +14,10 @@ public final class Config {
 
 	static final int JoystickChannel = 0;
 	static final int XBoxChannel = 1;
+	
+	static final int LiftHiLimitPort = 9;
+	static final int LiftLoLimitPort = 7;
+	static final int GrabHiLimitPort = 8;
 
 	static final int EncoderTopValue = 10000;
 	static final int LiftEncoderPort = 4;
@@ -29,5 +33,4 @@ public final class Config {
 	static final int DrivetrainEncoderFrontLeft = 0;
 	static final int DrivetrainEncoderRearRight = 3;
 	static final int DrivetrainEncoderRearLeft = 2;
-
 }
