@@ -12,14 +12,14 @@ public class DrivingData {
 	public DrivingData(DrivingDataType t) {
 		if (t == DrivingDataType.TroyMiddle) {
 			java.util.Arrays.sort(this.AshikTest, new java.util.Comparator<double[]>() {
-				 public int compare(double[] d1, double[] d2) {
-					 return Double.compare(d1[0], d2[0]);
-				 }
+				public int compare(double[] d1, double[] d2) {
+					return Double.compare(d1[0], d2[0]);
+				}
 			});
-			
+
 			driveDataArray = this.AshikTest;
 		}
-		
+
 		// if (t == DrivingDataType.TroyMiddle) {
 		// for (int i = 0; i < this.troyMiddleDriving.length; i++) {
 		// this.troyMiddleDriving[i][0] -= 167591;

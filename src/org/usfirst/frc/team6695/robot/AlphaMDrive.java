@@ -58,6 +58,9 @@ public class AlphaMDrive extends RobotDriveBase {
 
 		xSpeed = limit(xSpeed);
 		xSpeed = applyDeadband(xSpeed, m_deadband);
+		
+		zRotation = limit(zRotation);
+		zRotation = applyDeadband(zRotation, m_deadband);
 
 		if (!mode) zRotation = 0;
 
