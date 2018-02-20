@@ -24,14 +24,6 @@ public final class Config {
 	static final int LiftEncoderPort = 4;
 	static final int EncoderRange = 200;
 
-	// static final int AutoSwitchLeftPosPort = 10;
-	// static final int AutoSwitchMiddlePosPort = 11;
-	// static final int AutoSwitchRightPosPort = 12;
-	// static final int AutoSwitchStraightPort = 13;
-	// static final int AutoSwitchScalePort = 20;
-	// static final int AutoSwitchSwitchPort = 22;
-	// static final int AutoSwitchDelay2sPort = 18;
-	// static final int AutoSwitchDelay5sPort = 19;
 	static final int AutoSwitchLeftPosPort = 10;
 	static final int AutoSwitchMiddlePosPort = 11;
 	static final int AutoSwitchRightPosPort = 12;

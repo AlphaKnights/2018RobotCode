@@ -2,6 +2,8 @@ package org.usfirst.frc.team6695.robot;
 
 import java.util.Arrays;
 
+import org.usfirst.frc.team6695.robot.DrivingData.DrivingDataType;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -299,46 +301,46 @@ public class Robot extends IterativeRobot {
 		// autonomousPathfinding(gameData, switches.getSwitches());
 
 		// TEST CODE
-		gyroscope.reset();
-
-		new Thread(() -> {
-			temp.reset();
-			temp.start();
-
-			while (temp.get() < 6 && !Thread.interrupted())
-				boxLift(true, false);
-			boxLift(false, false);
-
-			temp.stop();
-			temp.reset();
-		}).start();
-
+		// gyroscope.reset();
+		//
 		// new Thread(() -> {
-		// temp2.reset();
-		// temp2.start();
+		// temp.reset();
+		// temp.start();
 		//
-		// while (temp2.get() < 1 && !Thread.interrupted())
-		// boxSpin(true, false);
-		// boxSpin(false, false);
+		// while (temp.get() < 6 && !Thread.interrupted())
+		// boxLift(true, false);
+		// boxLift(false, false);
 		//
-		// temp2.stop();
-		// temp2.reset();
+		// temp.stop();
+		// temp.reset();
 		// }).start();
-
-		DriveY(.5, 24 * 24 / 14.75);
-		DriveReset(1);
-		DriveToAngle(-0.2, 270);
-		DriveReset(0.8);
-
-		temp.reset();
-		temp.start();
-
-		while (temp.get() < 0.5)
-			boxGrab(true, false);
-		boxGrab(false, false);
-
-		temp.stop();
-		temp.reset();
+		//
+		// // new Thread(() -> {
+		// // temp2.reset();
+		// // temp2.start();
+		// //
+		// // while (temp2.get() < 1 && !Thread.interrupted())
+		// // boxSpin(true, false);
+		// // boxSpin(false, false);
+		// //
+		// // temp2.stop();
+		// // temp2.reset();
+		// // }).start();
+		//
+		// DriveY(.5, 24 * 24 / 14.75);
+		// DriveReset(1);
+		// DriveToAngle(-0.2, 270);
+		// DriveReset(0.8);
+		//
+		// temp.reset();
+		// temp.start();
+		//
+		// while (temp.get() < 0.5)
+		// boxGrab(true, false);
+		// boxGrab(false, false);
+		//
+		// temp.stop();
+		// temp.reset();
 	}
 
 	/**
@@ -616,6 +618,28 @@ public class Robot extends IterativeRobot {
 		// ultra1.setAutomaticMode(true);
 
 		// DriveToAngle(-0.5, 0);
+
+		autotime.reset();
+		autotime.start();
+		
+		DrivingData driveData = new DrivingData(DrivingDataType.TroyMiddle);
+		
+		int timeIndex = 0;
+		autotime.reset();
+		autotime.start();
+		
+		while (!teleOpCalled) {
+			if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+				frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+				frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+				rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+				rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+				System.out.println("motor set at " + autotime.get());
+				System.out.println(timeIndex++);
+				if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+			}
+			if (autotime.get() >= 15.0) teleOpCalled = true;
+		}
 	}
 
 	/**
@@ -637,7 +661,18 @@ public class Robot extends IterativeRobot {
 		// System.out.println();
 		// System.out.println(ultra1.getRangeInches());
 
-		System.out.println(Arrays.toString(switches.getSwitches()));
+//		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
+//		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
+//		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
+//				joystick.getTrigger());
+
+		double[] autoRecord = { autotime.get(), frontLeft.getMotorOutputPercent(), frontRight.getMotorOutputPercent(),
+				rearLeft.getMotorOutputPercent(), rearRight.getMotorOutputPercent(),
+				boxLiftMotor.getMotorOutputPercent(), closingBoxLiftMotor.getMotorOutputPercent(),
+				liftSpinMotor.getMotorOutputPercent() };
+		
+		// Time, Drivetrain FL, FR, RL, RR, Lift, Grabber, Spinner
+		System.out.println(Arrays.toString(autoRecord));
 	}
 
 	/**
