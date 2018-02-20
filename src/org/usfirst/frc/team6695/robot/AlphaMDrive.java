@@ -81,7 +81,6 @@ public class AlphaMDrive extends RobotDriveBase {
 		m_safetyHelper.feed();
 	}
 
-
 	public void driveTurn(double zRotation, double gyroAngle, double throttle) {
 		driveCartesian(0.0, 0.0, zRotation, gyroAngle, throttle);
 	}

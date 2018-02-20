@@ -510,8 +510,7 @@ public class Robot extends IterativeRobot {
 	public void boxLift(boolean goUp, boolean goDown) {
 		if (goUp) {
 			if (boxLiftLimit.get() || liftMidLimit.get()) boxLiftMotor.set(ControlMode.PercentOutput, 1);
-		}
-		else if (goDown && liftLowLimit.get()) boxLiftMotor.set(ControlMode.PercentOutput, -.5);
+		} else if (goDown && liftLowLimit.get()) boxLiftMotor.set(ControlMode.PercentOutput, -.5);
 		else boxLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 
