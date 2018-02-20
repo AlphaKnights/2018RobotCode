@@ -180,7 +180,7 @@ public class Robot extends IterativeRobot {
 
 		boxLiftMotor.configContinuousCurrentLimit(10, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(5, 500);
-		liftSpinMotor.configContinuousCurrentLimit(36, 500);
+		liftSpinMotor.configContinuousCurrentLimit(6, 500);
 
 		boxLiftLimit = new DigitalInput(Config.LiftHiLimitPort);
 		liftMidLimit = new DigitalInput(Config.LiftMidLimitPort);
@@ -552,10 +552,11 @@ public class Robot extends IterativeRobot {
 	 * @param goDown
 	 *            Button to lower the forklift
 	 */
+	@Deprecated
 	public void forklift(boolean goUp, boolean goDown) {
-		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
-		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
-		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
+//		if (goUp) forkLiftMotor.set(ControlMode.PercentOutput, 1);
+//		else if (goDown) forkLiftMotor.set(ControlMode.PercentOutput, -1);
+//		else forkLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 
 	/**
@@ -564,8 +565,9 @@ public class Robot extends IterativeRobot {
 	 * @param deploy
 	 *            Button to deploy the forks
 	 */
+	@Deprecated
 	public void forkliftDeploy(boolean deploy, boolean areYouSure) {
-		if (deploy && areYouSure) rightServo.set(0.5);
+//		if (deploy && areYouSure) rightServo.set(0.5);
 	}
 
 	// TODO: Test & Document updateFromDashboard()
@@ -610,15 +612,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testInit() {
-		// DTEncFL.reset();
-		// DTEncFR.reset();
-		// DTEncRL.reset();
-		// DTEncRR.reset();
-		//
-		// ultra1.setAutomaticMode(true);
-
-		// DriveToAngle(-0.5, 0);
-
 		autotime.reset();
 		autotime.start();
 		
@@ -634,6 +627,10 @@ public class Robot extends IterativeRobot {
 				frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
 				rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
 				rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+				boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+				closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+				liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+				
 				System.out.println("motor set at " + autotime.get());
 				System.out.println(timeIndex++);
 				if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
@@ -647,20 +644,6 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
-		// driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), -90,
-		// joystick.getThrottle(),
-		// joystick.getTrigger());
-		//
-		// System.out.println("FRONTLEFT: " + DTEncFL.get() + ", FRONTRIGHT: " + DTEncFR.get() + ",
-		// REARLEFT: "
-		// + DTEncRL.get() + ", REARRIGHT: " + DTEncRR.get());
-		// System.out.println();
-		// for (boolean c : switches.getSwitches()) {
-		// System.out.print(c + " ");
-		// }
-		// System.out.println();
-		// System.out.println(ultra1.getRangeInches());
-
 //		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
 //		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 //		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
