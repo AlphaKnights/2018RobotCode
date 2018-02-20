@@ -1,5 +1,7 @@
 package org.usfirst.frc.team6695.robot;
 
+import java.util.Arrays;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -12,7 +14,6 @@ import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
@@ -39,20 +40,15 @@ public class Robot extends IterativeRobot {
 
 	/** Linear Slide Encoder **/
 	Counter boxLiftEncoder;
-	
+
 	/** Linear Slide Max Height Limit Switch **/
 	DigitalInput boxLiftLimit;
 	/** Linear Slide Min Height Limit Switch **/
 	DigitalInput liftLowLimit;
+	/** Liniar Slide Mid Hight Limit Switch **/
+	DigitalInput liftMidLimit;
 	/** Grabber Outer Limit Switch **/
 	DigitalInput boxGrabLimit;
-	
-	/** Linear Slide Max Height Limit Switch Default **/
-	boolean boxLiftLimitDefault;
-	/** Linear Slide Min Height Limit Switch Default **/
-	boolean liftLowLimitDefault;
-	/** Grabber Outer Limit Switch Default **/
-	boolean boxGrabLimitDefault;
 
 	/** Linear Slide Displacement Sensor **/
 	Ultrasonic ultra1;
@@ -105,11 +101,15 @@ public class Robot extends IterativeRobot {
 	Position fieldPosition;
 	/** Autonomous Time Elapsed **/
 	Timer autotime;
-	/** Autonomous Error LED **/
-	Relay errorLED;
+	/** Autonomous Multithread Timer 1 **/
+	Timer temp;
+	/** Autonomous Mutlithread Timer 2 **/
+	Timer temp2;
+	// /** Autonomous Error LED **/
+	// Relay errorLED;
 
 	/* Servos */
-	
+
 	/** Right Side Servo **/
 	Servo rightServo;
 	/** Left Side Servo **/
@@ -125,7 +125,7 @@ public class Robot extends IterativeRobot {
 	boolean switchPriority = false;
 	/** Autoline Priority **/
 	boolean autonomousStraight = false;
-	
+
 	/* ---------------------------------------- */
 
 	/**
@@ -179,17 +179,14 @@ public class Robot extends IterativeRobot {
 		boxLiftMotor.configContinuousCurrentLimit(10, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(5, 500);
 		liftSpinMotor.configContinuousCurrentLimit(36, 500);
-		
+
 		boxLiftLimit = new DigitalInput(Config.LiftHiLimitPort);
+		liftMidLimit = new DigitalInput(Config.LiftMidLimitPort);
 		liftLowLimit = new DigitalInput(Config.LiftLoLimitPort);
 		boxGrabLimit = new DigitalInput(Config.GrabHiLimitPort);
-		
-		boxLiftLimitDefault = boxLiftLimit.get();
-		liftLowLimitDefault = liftLowLimit.get();
-		boxGrabLimitDefault = boxGrabLimit.get();
 
 		boxLiftEncoder = new Counter(Config.LiftEncoderPort);
-//		ultra1 = new Ultrasonic(8, 9);
+		// ultra1 = new Ultrasonic(8, 9);
 
 		/** Forklift Subsystem Setup **/
 		forkLiftMotor = new TalonSRX(Config.ForkLiftMotor);
@@ -197,13 +194,18 @@ public class Robot extends IterativeRobot {
 		leftServo = new Servo(1);
 
 		/** Autonomous Subsystem Setup **/
-		switches = new ModeSelector(18, 11, 12, 13, 14, 15, 16, 17);
+		switches = new ModeSelector(Config.AutoSwitchLeftPosPort, Config.AutoSwitchMiddlePosPort,
+				Config.AutoSwitchRightPosPort, Config.AutoSwitchStraightPort, Config.AutoSwitchScalePort,
+				Config.AutoSwitchSwitchPort, Config.AutoSwitchDelay2sPort, Config.AutoSwitchDelay5sPort);
+
 		autotime = new Timer();
+		temp = new Timer();
+		temp2 = new Timer();
 
 		gyroscope = new ADXRS450_Gyro(SPI.Port.kOnboardCS0);
 		gyroscope.calibrate();
-		
-//		errorLED = new Relay(0, Direction.kForward);
+
+		// errorLED = new Relay(0, Direction.kForward);
 
 		/** Dashboard Tasks **/
 		tableSetup();
@@ -214,10 +216,10 @@ public class Robot extends IterativeRobot {
 
 	@Override
 	public void robotPeriodic() {
-//		if (switches.hasError()) errorLED.set(Relay.Value.kOn);
-//		else errorLED.set(Relay.Value.kOff);
-		
-//		errorLED.set(Relay.Value.kOn);
+		// if (switches.hasError()) errorLED.set(Relay.Value.kOn);
+		// else errorLED.set(Relay.Value.kOff);
+
+		// errorLED.set(Relay.Value.kOn);
 	}
 
 	/**
@@ -255,23 +257,23 @@ public class Robot extends IterativeRobot {
 		/** Xbox-Controlled Lift Spinning **/
 		boxSpin(xbox.getStartButton(), xbox.getBackButton());
 
-//		/** Joystick-Controlled Forklift **/
-//		forklift(xbox.getBumper(Hand.kRight), xbox.getBumper(Hand.kLeft));
-//		/** Joystick-Controlled Forklift Deploy **/
-//		forkliftDeploy(joystick.getRawButton(2), joystick.getRawButton(9));
+		// /** Joystick-Controlled Forklift **/
+		// forklift(xbox.getBumper(Hand.kRight), xbox.getBumper(Hand.kLeft));
+		// /** Joystick-Controlled Forklift Deploy **/
+		// forkliftDeploy(joystick.getRawButton(2), joystick.getRawButton(9));
 
 		/** Update Deadzone **/
 		updateFromDashboard(joystick.getRawButton(11));
 
 		System.out.println("Lift Limit Reached: " + boxLiftLimit.get());
-//		SmartDashboard.putNumber("Slider Height in. ", ultra1.getRangeInches());
-//		SmartDashboard.getNumber("Limit Height", sliderLimitHeight);
-		
-//		if (ultra1.getRangeInches() > sliderLimitHeight) {
-//			SmartDashboard.putBoolean("Max Slider Height ", false);
-//		} else {
-//			SmartDashboard.putBoolean("Max Slider Height ", true);
-//		}
+		// SmartDashboard.putNumber("Slider Height in. ", ultra1.getRangeInches());
+		// SmartDashboard.getNumber("Limit Height", sliderLimitHeight);
+
+		// if (ultra1.getRangeInches() > sliderLimitHeight) {
+		// SmartDashboard.putBoolean("Max Slider Height ", false);
+		// } else {
+		// SmartDashboard.putBoolean("Max Slider Height ", true);
+		// }
 	}
 
 	/**
@@ -291,47 +293,42 @@ public class Robot extends IterativeRobot {
 		autotime.reset();
 		autotime.start();
 
-		Timer temp = new Timer();
-		Timer temp2 = new Timer();
-
 		/** Switch and Scale Alliance Positions **/
 		// String gameData = DriverStation.getInstance().getGameSpecificMessage();
 		/** Execute Desired Autonomous Pathway **/
 		// autonomousPathfinding(gameData, switches.getSwitches());
 
 		// TEST CODE
+		gyroscope.reset();
+
 		new Thread(() -> {
 			temp.reset();
 			temp.start();
 
-			while (temp.get() < 2 && !Thread.interrupted())
+			while (temp.get() < 6 && !Thread.interrupted())
 				boxLift(true, false);
 			boxLift(false, false);
 
 			temp.stop();
 			temp.reset();
 		}).start();
-		
-		new Thread(() -> {
-			temp2.reset();
-			temp2.start();
 
-			while (temp2.get() < 1 && !Thread.interrupted())
-				boxSpin(true, false);
-			boxSpin(false, false);
+		// new Thread(() -> {
+		// temp2.reset();
+		// temp2.start();
+		//
+		// while (temp2.get() < 1 && !Thread.interrupted())
+		// boxSpin(true, false);
+		// boxSpin(false, false);
+		//
+		// temp2.stop();
+		// temp2.reset();
+		// }).start();
 
-			temp2.stop();
-			temp2.reset();
-		}).start();
-		
-		DriveY(.5, 4);
-		DriveReset(0.1);
-		DriveX(.5, 6.25);
-		DriveReset(0.1);
-		DriveY(.5, 7);
+		DriveY(.5, 24 * 24 / 14.75);
 		DriveReset(1);
-		DriveToAngle(-0.5, 0);
-		DriveReset(1.5);
+		DriveToAngle(-0.2, 270);
+		DriveReset(0.8);
 
 		temp.reset();
 		temp.start();
@@ -424,11 +421,50 @@ public class Robot extends IterativeRobot {
 				DriveReset(0.1);
 				DriveY(.5, 5);
 			} else if (gameData.charAt(0) == 'R') {
+				gyroscope.reset();
+
+				new Thread(() -> {
+					temp.reset();
+					temp.start();
+
+					while (temp.get() < 2.5 && !Thread.interrupted())
+						boxLift(true, false);
+					boxLift(false, false);
+
+					temp.stop();
+					temp.reset();
+				}).start();
+
+				new Thread(() -> {
+					temp2.reset();
+					temp2.start();
+
+					while (temp2.get() < 1 && !Thread.interrupted())
+						boxSpin(true, false);
+					boxSpin(false, false);
+
+					temp2.stop();
+					temp2.reset();
+				}).start();
+
 				DriveY(.5, 4);
 				DriveReset(0.1);
-				DriveX(.5, 7);
+				DriveX(.5, 6.25);
 				DriveReset(0.1);
-				DriveY(.5, 5);
+				DriveY(.5, 7);
+				DriveReset(1);
+				DriveToAngle(-0.2, 0);
+				DriveReset(0.8);
+
+				temp.reset();
+				temp.start();
+
+				while (temp.get() < 0.5)
+					boxGrab(true, false);
+				boxGrab(false, false);
+
+				temp.stop();
+				temp.reset();
 			} else {
 				System.err.println("Couldn't determine gameData.charAt(0)");
 			}
@@ -472,7 +508,9 @@ public class Robot extends IterativeRobot {
 	 *            Button to lower the linear slide
 	 */
 	public void boxLift(boolean goUp, boolean goDown) {
-		if (goUp && boxLiftLimit.get()) boxLiftMotor.set(ControlMode.PercentOutput, 1);
+		if (goUp) {
+			if (boxLiftLimit.get() || liftMidLimit.get()) boxLiftMotor.set(ControlMode.PercentOutput, 1);
+		}
 		else if (goDown && liftLowLimit.get()) boxLiftMotor.set(ControlMode.PercentOutput, -.5);
 		else boxLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
@@ -534,34 +572,34 @@ public class Robot extends IterativeRobot {
 		if (!update) return;
 		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
 	}
-	
+
 	public void DriveToAngle(double speed, double angle) {
-		double initialDegrees = gyroscope.getAngle();
-		
 		Timer driveTimer = new Timer();
 		driveTimer.reset();
 		driveTimer.start();
-		
+
 		if (speed < 0) {
 			while (gyroscope.getAngle() % 360 > angle && !teleOpCalled && autotime.get() < 15) {
 				if (driveTimer.get() < 0.15) driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
 				else driveRotational(speed);
-				
-				System.out.println("Gyro Normalized Angle (1): " + Math.abs(gyroscope.getAngle()) % 360);
+
+				System.out.println("Gyro Normalized Angle (1): " + gyroscope.getAngle() % 360);
 			}
 		} else {
 			while (gyroscope.getAngle() % 360 < angle && !teleOpCalled && autotime.get() < 15) {
 				if (driveTimer.get() < 0.15) driveRotational(speed * driveTimer.get() * (1.0 / 0.15));
 				else driveRotational(speed);
-				
-				System.out.println("Gyro Normalized Angle (2): " + Math.abs(gyroscope.getAngle()) % 360);
+
+				System.out.println("Gyro Normalized Angle (2): " + gyroscope.getAngle() % 360);
 			}
 		}
-		
+
+		driveRotational(0);
+
 		driveTimer.stop();
 		driveTimer.reset();
 	}
-	
+
 	/**
 	 * Initialization code for test mode is here.
 	 *
@@ -577,8 +615,8 @@ public class Robot extends IterativeRobot {
 		// DTEncRR.reset();
 		//
 		// ultra1.setAutomaticMode(true);
-		
-		DriveToAngle(-0.5, 0);
+
+		// DriveToAngle(-0.5, 0);
 	}
 
 	/**
@@ -599,6 +637,8 @@ public class Robot extends IterativeRobot {
 		// }
 		// System.out.println();
 		// System.out.println(ultra1.getRangeInches());
+
+		System.out.println(Arrays.toString(switches.getSwitches()));
 	}
 
 	/**

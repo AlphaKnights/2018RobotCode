@@ -51,8 +51,8 @@ public class ModeSelector {
 	}
 
 	public boolean[] getSwitches() {
-		boolean switchMode[] = { switch1.get(), switch2.get(), switch3.get(), switch4.get(), switch5.get(),
-				switch6.get(), switch7.get(), switch8.get() };
+		boolean switchMode[] = { !switch1.get(), !switch2.get(), !switch3.get(), !switch4.get(), !switch5.get(),
+				!switch6.get(), !switch7.get(), !switch8.get() };
 
 		return switchMode;
 	}

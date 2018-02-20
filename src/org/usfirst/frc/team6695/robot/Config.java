@@ -14,14 +14,32 @@ public final class Config {
 
 	static final int JoystickChannel = 0;
 	static final int XBoxChannel = 1;
-	
+
 	static final int LiftHiLimitPort = 9;
+	static final int LiftMidLimitPort = 5;
 	static final int LiftLoLimitPort = 7;
 	static final int GrabHiLimitPort = 8;
 
 	static final int EncoderTopValue = 10000;
 	static final int LiftEncoderPort = 4;
 	static final int EncoderRange = 200;
+
+	// static final int AutoSwitchLeftPosPort = 10;
+	// static final int AutoSwitchMiddlePosPort = 11;
+	// static final int AutoSwitchRightPosPort = 12;
+	// static final int AutoSwitchStraightPort = 13;
+	// static final int AutoSwitchScalePort = 20;
+	// static final int AutoSwitchSwitchPort = 22;
+	// static final int AutoSwitchDelay2sPort = 18;
+	// static final int AutoSwitchDelay5sPort = 19;
+	static final int AutoSwitchLeftPosPort = 10;
+	static final int AutoSwitchMiddlePosPort = 11;
+	static final int AutoSwitchRightPosPort = 12;
+	static final int AutoSwitchStraightPort = 13;
+	static final int AutoSwitchScalePort = 14;
+	static final int AutoSwitchSwitchPort = 15;
+	static final int AutoSwitchDelay2sPort = 16;
+	static final int AutoSwitchDelay5sPort = 17;
 
 	// 1 foot
 	static final double encUnit = (529 + 541 + 578 + 655) / (11 * 4);
