@@ -179,8 +179,8 @@ public class Robot extends IterativeRobot {
 		liftSpinMotor.enableCurrentLimit(true);
 
 		boxLiftMotor.configContinuousCurrentLimit(10, 500);
-		closingBoxLiftMotor.configContinuousCurrentLimit(5, 500);
-		liftSpinMotor.configContinuousCurrentLimit(6, 500);
+		closingBoxLiftMotor.configContinuousCurrentLimit(7, 500);
+		liftSpinMotor.configContinuousCurrentLimit(30, 500);
 
 		boxLiftLimit = new DigitalInput(Config.LiftHiLimitPort);
 		liftMidLimit = new DigitalInput(Config.LiftMidLimitPort);
@@ -267,7 +267,7 @@ public class Robot extends IterativeRobot {
 		/** Update Deadzone **/
 		updateFromDashboard(joystick.getRawButton(11));
 
-		System.out.println("Lift Limit Reached: " + boxLiftLimit.get());
+		System.out.println("Snowblower Current: " + liftSpinMotor.getOutputCurrent());
 		// SmartDashboard.putNumber("Slider Height in. ", ultra1.getRangeInches());
 		// SmartDashboard.getNumber("Limit Height", sliderLimitHeight);
 
@@ -300,6 +300,29 @@ public class Robot extends IterativeRobot {
 		/** Execute Desired Autonomous Pathway **/
 		// autonomousPathfinding(gameData, switches.getSwitches());
 
+		DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
+		
+		int timeIndex = 0;
+		autotime.reset();
+		autotime.start();
+		
+		while (!teleOpCalled) {
+			if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+				frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+				frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+				rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+				rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+				boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+				closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+				liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+				
+				System.out.println("motor set at " + autotime.get());
+				System.out.println(timeIndex++);
+				if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+			}
+			if (autotime.get() >= 15.0) teleOpCalled = true;
+		}
+		
 		// TEST CODE
 		// gyroscope.reset();
 		//
@@ -525,8 +548,8 @@ public class Robot extends IterativeRobot {
 	 *            Button to open the grabber
 	 */
 	public void boxGrab(boolean close, boolean open) {
-		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, .5);
-		else if (close && boxGrabLimit.get()) closingBoxLiftMotor.set(ControlMode.PercentOutput, -.5);
+		if (open) closingBoxLiftMotor.set(ControlMode.PercentOutput, .6);
+		else if (close && boxGrabLimit.get()) closingBoxLiftMotor.set(ControlMode.PercentOutput, -.6);
 		else closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
 	}
 
@@ -539,9 +562,9 @@ public class Robot extends IterativeRobot {
 	 *            Button to unwind the grabber
 	 */
 	public void boxSpin(boolean wind, boolean unwind) {
-		if (wind) liftSpinMotor.set(ControlMode.PercentOutput, 0.2);
-		else if (unwind) liftSpinMotor.set(ControlMode.PercentOutput, -1);
-		else liftSpinMotor.set(ControlMode.PercentOutput, 0);
+		if (wind) liftSpinMotor.set(ControlMode.PercentOutput, 1);
+		else if (unwind) liftSpinMotor.set(ControlMode.PercentOutput, -0.3);
+		else liftSpinMotor.set(ControlMode.PercentOutput, 0.05);
 	}
 
 	/**
@@ -614,29 +637,29 @@ public class Robot extends IterativeRobot {
 	public void testInit() {
 		autotime.reset();
 		autotime.start();
-		
-		DrivingData driveData = new DrivingData(DrivingDataType.TroyMiddle);
-		
-		int timeIndex = 0;
-		autotime.reset();
-		autotime.start();
-		
-		while (!teleOpCalled) {
-			if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
-				frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
-				frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
-				rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
-				rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
-				boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
-				closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
-				liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
-				
-				System.out.println("motor set at " + autotime.get());
-				System.out.println(timeIndex++);
-				if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
-			}
-			if (autotime.get() >= 15.0) teleOpCalled = true;
-		}
+//		
+//		DrivingData driveData = new DrivingData(DrivingDataType.TroyMiddle);
+//		
+//		int timeIndex = 0;
+//		autotime.reset();
+//		autotime.start();
+//		
+//		while (!teleOpCalled) {
+//			if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+//				frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+//				frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+//				rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+//				rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+//				boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+//				closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+//				liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+//				
+//				System.out.println("motor set at " + autotime.get());
+//				System.out.println(timeIndex++);
+//				if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+//			}
+//			if (autotime.get() >= 15.0) teleOpCalled = true;
+//		}
 	}
 
 	/**
@@ -644,10 +667,17 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
-//		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
-//		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
-//		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
-//				joystick.getTrigger());
+		driveTrain = new AlphaMDrive(frontLeft, rearLeft, frontRight, rearRight, ControlMode.PercentOutput);
+		driveTrain.setDeadband(DeadBandEntry.getDouble(.1));
+		driveTrain.driveCartesianMichael(joystick.getY(), joystick.getX(), joystick.getZ(), 90, joystick.getThrottle(),
+				joystick.getTrigger());
+
+		/** Xbox-Controlled Linear Sliding **/
+		boxLift(xbox.getYButton(), xbox.getAButton());
+		/** Xbox-Controlled Power Cube Grabbing **/
+		boxGrab(xbox.getBButton(), xbox.getXButton());
+		/** Xbox-Controlled Lift Spinning **/
+		boxSpin(xbox.getStartButton(), xbox.getBackButton());
 
 		double[] autoRecord = { autotime.get(), frontLeft.getMotorOutputPercent(), frontRight.getMotorOutputPercent(),
 				rearLeft.getMotorOutputPercent(), rearRight.getMotorOutputPercent(),
