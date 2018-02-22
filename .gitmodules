@@ -1,0 +1,3 @@
+[submodule "AlphaKnightsTools"]
+	path = AlphaKnightsTools
+	url = https://github.com/AlphaKnights/AlphaKnightsTools
