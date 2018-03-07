@@ -296,32 +296,34 @@ public class Robot extends IterativeRobot {
 		autotime.start();
 
 		/** Switch and Scale Alliance Positions **/
-		// String gameData = DriverStation.getInstance().getGameSpecificMessage();
+        while (gameData.length != 3 && autotime.get() < 3.0) {
+            String gameData = DriverStation.getInstance().getGameSpecificMessage();
+        }
 		/** Execute Desired Autonomous Pathway **/
-		// autonomousPathfinding(gameData, switches.getSwitches());
+		autonomousPathfinding(gameData, switches.getSwitches());
 
-		DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
+		// DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
 		
-		int timeIndex = 0;
-		autotime.reset();
-		autotime.start();
+		// int timeIndex = 0;
+		// autotime.reset();
+		// autotime.start();
 		
-		while (!teleOpCalled) {
-			if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
-				frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
-				frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
-				rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
-				rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
-				boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
-				closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
-				liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+		// while (!teleOpCalled) {
+		// 	if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+		// 		frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+		// 		frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+		// 		rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+		// 		rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+		// 		boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+		// 		closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+		// 		liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
 				
-				System.out.println("motor set at " + autotime.get());
-				System.out.println(timeIndex++);
-				if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
-			}
-			if (autotime.get() >= 15.0) teleOpCalled = true;
-		}
+		// 		System.out.println("motor set at " + autotime.get());
+		// 		System.out.println(timeIndex++);
+		// 		if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+		// 	}
+		// 	if (autotime.get() >= 15.0) teleOpCalled = true;
+		// }
 		
 		// TEST CODE
 		// gyroscope.reset();
@@ -414,114 +416,112 @@ public class Robot extends IterativeRobot {
 
 		if (fieldPosition == Position.Left) {
 
-			if (autonomousStraight) {
-				System.out.println("Go straight, middle, and stop");
-				// Put left auto code here for straight
-			} else if (scalePriority) {
-				if (gameData.charAt(1) == 'L') {
-					// Put left auto code here with scale priority
-				} else if (gameData.charAt(1) == 'R') {
-					// Put left auto code here for straight
-				} else {
-					System.err.println("Couldn't determine gameData.charAt(1)");
-				}
-			} else if (switchPriority) {
-				if (gameData.charAt(0) == 'L') {
-					// Put left auto code here with switch priority
-				} else if (gameData.charAt(0) == 'R') {
-					DriveX(.5, 10);
-					// Put left auto code here for straight
-				} else {
-					System.err.println("Couldn't determine gameData.charAt(0)");
-				}
-			}
+            DriveY(0.5, 10);
+
+			// if (autonomousStraight) {
+			// 	System.out.println("Go straight, middle, and stop");
+			// 	// Put left auto code here for straight
+			// } else if (scalePriority) {
+			// 	if (gameData.charAt(1) == 'L') {
+			// 		// Put left auto code here with scale priority
+			// 	} else if (gameData.charAt(1) == 'R') {
+			// 		// Put left auto code here for straight
+			// 	} else {
+			// 		System.err.println("Couldn't determine gameData.charAt(1)");
+			// 	}
+			// } else if (switchPriority) {
+			// 	if (gameData.charAt(0) == 'L') {
+			// 		// Put left auto code here with switch priority
+			// 	} else if (gameData.charAt(0) == 'R') {
+			// 		DriveX(.5, 10);
+			// 		// Put left auto code here for straight
+			// 	} else {
+			// 		System.err.println("Couldn't determine gameData.charAt(0)");
+			// 	}
+			// }
 
 		} else if (fieldPosition == Position.Middle) {
 
 			// TODO: Grabber and Slide
 			if (gameData.charAt(0) == 'L') {
-				DriveY(.5, 4);
-				DriveReset(0.1);
-				DriveX(-.5, 7);
-				DriveReset(0.1);
-				DriveY(.5, 5);
+				DrivingData driveData = new DrivingData(DrivingDataType.MiddleL);
+		
+                int timeIndex = 0;
+                while (!teleOpCalled) {
+                    if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+                        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+                        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+                        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+                        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+
+                        if (driveData.driveDataArray[timeIndex][5] > 0 && (boxLiftLimit.get() || liftMidLimit.get())) {
+                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+                        } else if (driveData.driveDataArray[timeIndex][5] < 0 && liftLowLimit.get()) {
+                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+                        } else {
+                            boxLiftMotor.set(ControlMode.PercentOutput, 0);
+                        }
+
+                        if (driveData.driveDataArray[timeIndex][6] < 0 && boxGrabLimit.get()) {
+                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+                        } else if (driveData.driveDataArray[timeIndex][6] < 0) {
+                            closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+                        } else {
+                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+                        }
+                        
+                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+                        
+                        System.out.println("motor set at " + autotime.get());
+                        System.out.println(timeIndex++);
+                        if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+                    }
+                    if (autotime.get() >= 15.0) teleOpCalled = true;
+                }
 			} else if (gameData.charAt(0) == 'R') {
-				gyroscope.reset();
+				DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
+		
+                int timeIndex = 0;
+                while (!teleOpCalled) {
+                    if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+                        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+                        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+                        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+                        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
 
-				new Thread(() -> {
-					temp.reset();
-					temp.start();
+                        if (driveData.driveDataArray[timeIndex][5] > 0 && (boxLiftLimit.get() || liftMidLimit.get())) {
+                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+                        } else if (driveData.driveDataArray[timeIndex][5] < 0 && liftLowLimit.get()) {
+                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+                        } else {
+                            boxLiftMotor.set(ControlMode.PercentOutput, 0);
+                        }
 
-					while (temp.get() < 2.5 && !Thread.interrupted())
-						boxLift(true, false);
-					boxLift(false, false);
-
-					temp.stop();
-					temp.reset();
-				}).start();
-
-				new Thread(() -> {
-					temp2.reset();
-					temp2.start();
-
-					while (temp2.get() < 1 && !Thread.interrupted())
-						boxSpin(true, false);
-					boxSpin(false, false);
-
-					temp2.stop();
-					temp2.reset();
-				}).start();
-
-				DriveY(.5, 4);
-				DriveReset(0.1);
-				DriveX(.5, 6.25);
-				DriveReset(0.1);
-				DriveY(.5, 7);
-				DriveReset(1);
-				DriveToAngle(-0.2, 0);
-				DriveReset(0.8);
-
-				temp.reset();
-				temp.start();
-
-				while (temp.get() < 0.5)
-					boxGrab(true, false);
-				boxGrab(false, false);
-
-				temp.stop();
-				temp.reset();
+                        if (driveData.driveDataArray[timeIndex][6] < 0 && boxGrabLimit.get()) {
+                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+                        } else if (driveData.driveDataArray[timeIndex][6] < 0) {
+                            closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+                        } else {
+                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+                        }
+                        
+                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+                        
+                        System.out.println("motor set at " + autotime.get());
+                        System.out.println(timeIndex++);
+                        if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+                    }
+                    if (autotime.get() >= 15.0) teleOpCalled = true;
+                }
 			} else {
 				System.err.println("Couldn't determine gameData.charAt(0)");
 			}
 
 		} else if (fieldPosition == Position.Right) {
-
-			if (autonomousStraight) {
-				System.out.println("Go straight"); // Go straight, middle, and stop
-			} else if (scalePriority) {
-				if (gameData.charAt(1) == 'L') {
-					// Put autonomous straight code here
-				} else if (gameData.charAt(1) == 'R') {
-					// Put right auto code here with scale priority
-				} else {
-					System.err.println("Couldn't determine gameData.charAt(1)");
-				}
-			} else if (switchPriority) {
-				if (gameData.charAt(0) == 'L') {
-					DriveX(0.5, 10);
-				} else if (gameData.charAt(0) == 'R') {
-					// Put right auto code here with switch priority
-				} else {
-					System.err.println("Couldn't determine gameData.charAt(0)");
-				}
-			}
-
+            DriveY(0.5, 10);
 		} else {
-			System.out.println("Go straight");
+			DriveY(0.5, 10);
 		}
-
-		// TODO: It doesn't help us to do nothing when the switches are set incorrectly
-		// so do the bare minimum in case of human error by the driveteam (go straight)
 	}
 
 	/**
