@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
@@ -178,9 +179,9 @@ public class Robot extends IterativeRobot {
 		closingBoxLiftMotor.enableCurrentLimit(true);
 		liftSpinMotor.enableCurrentLimit(true);
 
-		boxLiftMotor.configContinuousCurrentLimit(10, 500);
+		boxLiftMotor.configContinuousCurrentLimit(20, 500);
 		closingBoxLiftMotor.configContinuousCurrentLimit(7, 500);
-		liftSpinMotor.configContinuousCurrentLimit(30, 500);
+		liftSpinMotor.configContinuousCurrentLimit(15, 500);
 
 		boxLiftLimit = new DigitalInput(Config.LiftHiLimitPort);
 		liftMidLimit = new DigitalInput(Config.LiftMidLimitPort);
@@ -296,9 +297,13 @@ public class Robot extends IterativeRobot {
 		autotime.start();
 
 		/** Switch and Scale Alliance Positions **/
-        while (gameData.length != 3 && autotime.get() < 3.0) {
-            String gameData = DriverStation.getInstance().getGameSpecificMessage();
+		String gameData = "";
+        while (gameData.equals("") && autotime.get() < 3.0) {
+            gameData = DriverStation.getInstance().getGameSpecificMessage();
         }
+        
+        System.out.println(gameData);
+        
 		/** Execute Desired Autonomous Pathway **/
 		autonomousPathfinding(gameData, switches.getSwitches());
 
@@ -380,11 +385,14 @@ public class Robot extends IterativeRobot {
 		// 5 - target switch
 		// 6 - delay 2s
 		// 7 - delay 5s
+		
+		input = switches.getSwitches();
 
 		if (input[0]) {
 			fieldPosition = Position.Left;
 		} else if (input[1]) {
 			fieldPosition = Position.Middle;
+			System.out.println("Middle Autonomous");
 		} else if (input[2]) {
 			fieldPosition = Position.Right;
 		} else {
@@ -441,9 +449,8 @@ public class Robot extends IterativeRobot {
 			// }
 
 		} else if (fieldPosition == Position.Middle) {
-
 			// TODO: Grabber and Slide
-			if (gameData.charAt(0) == 'L') {
+			if (gameData.charAt(0) == 'L' && (autonomousStraight || scalePriority || switchPriority)) {
 				DrivingData driveData = new DrivingData(DrivingDataType.MiddleL);
 		
                 int timeIndex = 0;
@@ -470,7 +477,11 @@ public class Robot extends IterativeRobot {
                             closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
                         }
                         
-                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+//                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+                        
+//                        if (autotime.get() < 1) {
+//                        	boxLiftMotor.set(ControlMode.PercentOutput, 0.5);
+//                        }
                         
                         System.out.println("motor set at " + autotime.get());
                         System.out.println(timeIndex++);
@@ -478,7 +489,7 @@ public class Robot extends IterativeRobot {
                     }
                     if (autotime.get() >= 15.0) teleOpCalled = true;
                 }
-			} else if (gameData.charAt(0) == 'R') {
+			} else if (gameData.charAt(0) == 'R' && (autonomousStraight || scalePriority || switchPriority)) {
 				DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
 		
                 int timeIndex = 0;
@@ -505,7 +516,11 @@ public class Robot extends IterativeRobot {
                             closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
                         }
                         
-                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+//                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+                        
+//                        if (autotime.get() < 1) {
+//                        	boxLiftMotor.set(ControlMode.PercentOutput, 0.5);
+//                        }
                         
                         System.out.println("motor set at " + autotime.get());
                         System.out.println(timeIndex++);
@@ -519,8 +534,6 @@ public class Robot extends IterativeRobot {
 
 		} else if (fieldPosition == Position.Right) {
             DriveY(0.5, 10);
-		} else {
-			DriveY(0.5, 10);
 		}
 	}
 
@@ -562,9 +575,9 @@ public class Robot extends IterativeRobot {
 	 *            Button to unwind the grabber
 	 */
 	public void boxSpin(boolean wind, boolean unwind) {
-		if (wind) liftSpinMotor.set(ControlMode.PercentOutput, 1);
-		else if (unwind) liftSpinMotor.set(ControlMode.PercentOutput, -0.3);
-		else liftSpinMotor.set(ControlMode.PercentOutput, 0.05);
+		if (wind) liftSpinMotor.set(ControlMode.PercentOutput, 0.5);
+		else if (unwind) liftSpinMotor.set(ControlMode.PercentOutput, -0.5);
+		else liftSpinMotor.set(ControlMode.PercentOutput, 0);
 	}
 
 	/**
@@ -686,6 +699,8 @@ public class Robot extends IterativeRobot {
 		
 		// Time, Drivetrain FL, FR, RL, RR, Lift, Grabber, Spinner
 		System.out.println(Arrays.toString(autoRecord));
+		
+//		System.out.println(Arrays.toString(switches.getSwitches()));
 	}
 
 	/**
@@ -713,10 +728,8 @@ public class Robot extends IterativeRobot {
 
 			if (driveTimer.get() < 0.15) {
 				driveLinearX(speed * driveTimer.get() * (1.0 / 0.15));
-				System.out.println("Speed: " + (speed * driveTimer.get() * (1.0 / 0.15)));
 			} else {
 				driveLinearX(speed);
-				System.out.println("Speed: " + speed);
 			}
 		}
 
@@ -751,10 +764,8 @@ public class Robot extends IterativeRobot {
 
 			if (driveTimer.get() < 0.15) {
 				driveLinearY(speed * driveTimer.get() * (1.0 / 0.15));
-				System.out.println("Speed: " + (speed * driveTimer.get() * (1.0 / 0.15)));
 			} else {
 				driveLinearY(speed);
-				System.out.println("Speed: " + speed);
 			}
 		}
 
