@@ -2,8 +2,6 @@ package org.usfirst.frc.team6695.robot;
 
 import java.util.Arrays;
 
-import org.usfirst.frc.team6695.robot.DrivingData.DrivingDataType;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -374,7 +372,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	/**
-	 * Pathfinding code for autonomous mode is here.
+	 * New code for the code training of Auto
 	 */
 	public void autonomousPathfinding(String gameData, boolean[] input) {
 		// 0 - left
@@ -385,156 +383,169 @@ public class Robot extends IterativeRobot {
 		// 5 - target switch
 		// 6 - delay 2s
 		// 7 - delay 5s
-		
-		input = switches.getSwitches();
 
-		if (input[0]) {
-			fieldPosition = Position.Left;
-		} else if (input[1]) {
-			fieldPosition = Position.Middle;
-			System.out.println("Middle Autonomous");
-		} else if (input[2]) {
-			fieldPosition = Position.Right;
-		} else {
-			fieldPosition = null;
-		}
+        FrontLeftPercentOutput = 1;
+        FrontRightPercentOutput = 1;
+        RearLeftPercentOutput = 1;
+        RearRightPercentOutput = 1;
 
-		if (input[3]) {
-			autonomousStraight = true;
-			System.out.println("Target straight");
-		} else if (input[4]) {
-			scalePriority = true;
-			System.out.println("Target scale");
-		} else if (input[5]) {
-			switchPriority = true;
-			System.out.println("Target switch");
-		}
 
-		if (input[6]) try {
-			Thread.sleep(2000);
-		} catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
 
-		if (input[7]) try {
-			Thread.sleep(5000);
-		} catch (InterruptedException ex) {
-			Thread.currentThread().interrupt();
-		}
+        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
 
-		if (fieldPosition == Position.Left) {
 
-            DriveY(0.5, 10);
-
-			// if (autonomousStraight) {
-			// 	System.out.println("Go straight, middle, and stop");
-			// 	// Put left auto code here for straight
-			// } else if (scalePriority) {
-			// 	if (gameData.charAt(1) == 'L') {
-			// 		// Put left auto code here with scale priority
-			// 	} else if (gameData.charAt(1) == 'R') {
-			// 		// Put left auto code here for straight
-			// 	} else {
-			// 		System.err.println("Couldn't determine gameData.charAt(1)");
-			// 	}
-			// } else if (switchPriority) {
-			// 	if (gameData.charAt(0) == 'L') {
-			// 		// Put left auto code here with switch priority
-			// 	} else if (gameData.charAt(0) == 'R') {
-			// 		DriveX(.5, 10);
-			// 		// Put left auto code here for straight
-			// 	} else {
-			// 		System.err.println("Couldn't determine gameData.charAt(0)");
-			// 	}
-			// }
-
-		} else if (fieldPosition == Position.Middle) {
-			// TODO: Grabber and Slide
-			if (gameData.charAt(0) == 'L' && (autonomousStraight || scalePriority || switchPriority)) {
-				DrivingData driveData = new DrivingData(DrivingDataType.MiddleL);
-		
-                int timeIndex = 0;
-                while (!teleOpCalled) {
-                    if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
-                        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
-                        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
-                        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
-                        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
-
-                        if (driveData.driveDataArray[timeIndex][5] > 0 && (boxLiftLimit.get() || liftMidLimit.get())) {
-                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
-                        } else if (driveData.driveDataArray[timeIndex][5] < 0 && liftLowLimit.get()) {
-                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
-                        } else {
-                            boxLiftMotor.set(ControlMode.PercentOutput, 0);
-                        }
-
-                        if (driveData.driveDataArray[timeIndex][6] < 0 && boxGrabLimit.get()) {
-                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
-                        } else if (driveData.driveDataArray[timeIndex][6] < 0) {
-                            closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
-                        } else {
-                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
-                        }
-                        
-//                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
-                        
-//                        if (autotime.get() < 1) {
-//                        	boxLiftMotor.set(ControlMode.PercentOutput, 0.5);
+//        input = switches.getSwitches();
+//
+//		if (input[0]) {
+//			fieldPosition = Position.Left;
+//		} else if (input[1]) {
+//			fieldPosition = Position.Middle;
+//			System.out.println("Middle Autonomous");
+//		} else if (input[2]) {
+//			fieldPosition = Position.Right;
+//		} else {
+//			fieldPosition = null;
+//		}
+//
+//		if (input[3]) {
+//			autonomousStraight = true;
+//			System.out.println("Target straight");
+//		} else if (input[4]) {
+//			scalePriority = true;
+//			System.out.println("Target scale");
+//		} else if (input[5]) {
+//			switchPriority = true;
+//			System.out.println("Target switch");
+//		}
+//
+//		if (input[6]) try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException ex) {
+//			Thread.currentThread().interrupt();
+//		}
+//
+//		if (input[7]) try {
+//			Thread.sleep(5000);
+//		} catch (InterruptedException ex) {
+//			Thread.currentThread().interrupt();
+//		}
+//
+//		if (fieldPosition == Position.Left) {
+//
+//            DriveY(0.5, 10);
+//
+//			// if (autonomousStraight) {
+//			// 	System.out.println("Go straight, middle, and stop");
+//			// 	// Put left auto code here for straight
+//			// } else if (scalePriority) {
+//			// 	if (gameData.charAt(1) == 'L') {
+//			// 		// Put left auto code here with scale priority
+//			// 	} else if (gameData.charAt(1) == 'R') {
+//			// 		// Put left auto code here for straight
+//			// 	} else {
+//			// 		System.err.println("Couldn't determine gameData.charAt(1)");
+//			// 	}
+//			// } else if (switchPriority) {
+//			// 	if (gameData.charAt(0) == 'L') {
+//			// 		// Put left auto code here with switch priority
+//			// 	} else if (gameData.charAt(0) == 'R') {
+//			// 		DriveX(.5, 10);
+//			// 		// Put left auto code here for straight
+//			// 	} else {
+//			// 		System.err.println("Couldn't determine gameData.charAt(0)");
+//			// 	}
+//			// }
+//
+//		} else if (fieldPosition == Position.Middle) {
+//			// TODO: Grabber and Slide
+//			if (gameData.charAt(0) == 'L' && (autonomousStraight || scalePriority || switchPriority)) {
+//				DrivingData driveData = new DrivingData(DrivingDataType.MiddleL);
+//
+//                int timeIndex = 0;
+//                while (!teleOpCalled) {
+//                    if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+//                        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+//                        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+//                        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+//                        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+//
+//                        if (driveData.driveDataArray[timeIndex][5] > 0 && (boxLiftLimit.get() || liftMidLimit.get())) {
+//                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+//                        } else if (driveData.driveDataArray[timeIndex][5] < 0 && liftLowLimit.get()) {
+//                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+//                        } else {
+//                            boxLiftMotor.set(ControlMode.PercentOutput, 0);
 //                        }
-                        
-                        System.out.println("motor set at " + autotime.get());
-                        System.out.println(timeIndex++);
-                        if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
-                    }
-                    if (autotime.get() >= 15.0) teleOpCalled = true;
-                }
-			} else if (gameData.charAt(0) == 'R' && (autonomousStraight || scalePriority || switchPriority)) {
-				DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
-		
-                int timeIndex = 0;
-                while (!teleOpCalled) {
-                    if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
-                        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
-                        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
-                        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
-                        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
-
-                        if (driveData.driveDataArray[timeIndex][5] > 0 && (boxLiftLimit.get() || liftMidLimit.get())) {
-                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
-                        } else if (driveData.driveDataArray[timeIndex][5] < 0 && liftLowLimit.get()) {
-                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
-                        } else {
-                            boxLiftMotor.set(ControlMode.PercentOutput, 0);
-                        }
-
-                        if (driveData.driveDataArray[timeIndex][6] < 0 && boxGrabLimit.get()) {
-                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
-                        } else if (driveData.driveDataArray[timeIndex][6] < 0) {
-                            closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
-                        } else {
-                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
-                        }
-                        
-//                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
-                        
-//                        if (autotime.get() < 1) {
-//                        	boxLiftMotor.set(ControlMode.PercentOutput, 0.5);
+//
+//                        if (driveData.driveDataArray[timeIndex][6] < 0 && boxGrabLimit.get()) {
+//                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+//                        } else if (driveData.driveDataArray[timeIndex][6] < 0) {
+//                            closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+//                        } else {
+//                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
 //                        }
-                        
-                        System.out.println("motor set at " + autotime.get());
-                        System.out.println(timeIndex++);
-                        if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
-                    }
-                    if (autotime.get() >= 15.0) teleOpCalled = true;
-                }
-			} else {
-				System.err.println("Couldn't determine gameData.charAt(0)");
-			}
-
-		} else if (fieldPosition == Position.Right) {
-            DriveY(0.5, 10);
-		}
+//
+////                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+//
+////                        if (autotime.get() < 1) {
+////                        	boxLiftMotor.set(ControlMode.PercentOutput, 0.5);
+////                        }
+//
+//                        System.out.println("motor set at " + autotime.get());
+//                        System.out.println(timeIndex++);
+//                        if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+//                    }
+//                    if (autotime.get() >= 15.0) teleOpCalled = true;
+//                }
+//			} else if (gameData.charAt(0) == 'R' && (autonomousStraight || scalePriority || switchPriority)) {
+//				DrivingData driveData = new DrivingData(DrivingDataType.MiddleR);
+//
+//                int timeIndex = 0;
+//                while (!teleOpCalled) {
+//                    if (autotime.get() >= driveData.driveDataArray[timeIndex][0]) {
+//                        frontLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][1]);
+//                        frontRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][2]);
+//                        rearLeft.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][3]);
+//                        rearRight.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][4]);
+//
+//                        if (driveData.driveDataArray[timeIndex][5] > 0 && (boxLiftLimit.get() || liftMidLimit.get())) {
+//                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+//                        } else if (driveData.driveDataArray[timeIndex][5] < 0 && liftLowLimit.get()) {
+//                            boxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][5]);
+//                        } else {
+//                            boxLiftMotor.set(ControlMode.PercentOutput, 0);
+//                        }
+//
+//                        if (driveData.driveDataArray[timeIndex][6] < 0 && boxGrabLimit.get()) {
+//                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+//                        } else if (driveData.driveDataArray[timeIndex][6] < 0) {
+//                            closingBoxLiftMotor.set(ControlMode.PercentOutput, 0);
+//                        } else {
+//                            closingBoxLiftMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][6]);
+//                        }
+//
+////                        liftSpinMotor.set(ControlMode.PercentOutput, driveData.driveDataArray[timeIndex][7]);
+//
+////                        if (autotime.get() < 1) {
+////                        	boxLiftMotor.set(ControlMode.PercentOutput, 0.5);
+////                        }
+//
+//                        System.out.println("motor set at " + autotime.get());
+//                        System.out.println(timeIndex++);
+//                        if (timeIndex == driveData.driveDataArray.length) teleOpCalled = true;
+//                    }
+//                    if (autotime.get() >= 15.0) teleOpCalled = true;
+//                }
+//			} else {
+//				System.err.println("Couldn't determine gameData.charAt(0)");
+//			}
+//
+//		} else if (fieldPosition == Position.Right) {
+//            DriveY(0.5, 10);
+//		}
 	}
 
 	/**
